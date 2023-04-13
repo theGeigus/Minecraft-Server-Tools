@@ -1,0 +1,17 @@
+Dedicated_Server.txt
+[2023-04-12 21:19:36:065 INFO] Starting Server
+[2023-04-12 21:19:36:065 INFO] Version 1.19.73.02
+[2023-04-12 21:19:36:065 INFO] Session ID a305fa9f-a769-45d3-adac-42e1946e0756
+[2023-04-12 21:19:36:065 INFO] Build ID 1.19.73
+[2023-04-12 21:19:36:065 INFO] Branch r/19_u7
+[2023-04-12 21:19:36:065 INFO] Commit ID d35745cb833f20ee4619eedc25be8d7043c64c44
+[2023-04-12 21:19:36:065 INFO] Configuration Publish
+[2023-04-12 21:19:36:065 INFO] Level Name: test
+[2023-04-12 21:19:36:065 INFO] Game mode: 0 Survival
+[2023-04-12 21:19:36:065 INFO] Difficulty: 3 HARD
+[2023-04-12 21:19:36:094 INFO] opening worlds/test/db
+[2023-04-12 21:19:37:474 INFO] IPv4 supported, port: 19132: Used for gameplay and LAN discovery
+[2023-04-12 21:19:37:474 INFO] IPv6 supported, port: 19133: Used for gameplay
+[2023-04-12 21:19:37:625 INFO] Server started.
+[2023-04-12 21:19:41:556 INFO] Server stop requested.
+[2023-04-12 21:19:41:587 INFO] Stopping server...

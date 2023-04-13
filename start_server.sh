@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Import variables
 source ./config_server.sh
 
@@ -40,7 +41,7 @@ fi
 #--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
 
 # Loop while server is running
-while [ `screen -ls | grep -o $SERVER_NAME` == "$SERVER_NAME" ]
+while [ "$(screen -ls | grep -o $SERVER_NAME)" == "$SERVER_NAME" ]
 do
 	# Wait for log update, if player connects set day and weather cycle to true
 	inotifywait -q -q -e MODIFY serverLog

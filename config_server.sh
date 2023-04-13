@@ -8,7 +8,7 @@
 SERVER_NAME="minecraft-server-tools"
 
 # Directory path to server folder location (do not include server folder in this)
-SOURCE_PATH="/home/$USER_NAME"
+SOURCE_PATH="/home/$USER/"
 
 # The following lines are planned, but are not yet functional
 # Enable daily automatic world backups

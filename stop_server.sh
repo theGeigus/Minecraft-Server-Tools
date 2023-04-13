@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SERVER_NAME="minecraft_bedrock"
+# Import variables
+source ./config_server.sh
 
 #--- STOP SERVER ---
 
