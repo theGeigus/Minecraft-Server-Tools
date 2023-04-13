@@ -17,7 +17,7 @@ else
 
 	# Clear previous log file and link it to the screen
 	echo "" > serverLog
-	screen -dmS $SERVER_NAME -L -Logfile serverLog bash -c "LD_LIBRARY_PATH=${SOURCE_PATH}/${SERVER_NAME} ${SOURCE_PATH}/${SERVER_NAME}/bedrock_server"
+	screen -dmS $SERVER_NAME -L -Logfile serverLog bash -c "LD_LIBRARY_PATH=${SOURCE_PATH}/ ${SOURCE_PATH}/bedrock_server"
 
 	echo "Server is now starting!"
 	sleep 2
