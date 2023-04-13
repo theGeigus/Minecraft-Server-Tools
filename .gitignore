@@ -18,5 +18,6 @@ world_templates/
 worlds/
 bedrock_server
 bedrock_server_symbols.debug
+Dedicated_Server.txt
 release-notes.txt
 valid_known_packs.json
