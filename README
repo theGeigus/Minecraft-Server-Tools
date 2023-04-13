@@ -1,0 +1,18 @@
+A collection of Minecraft Bedrock server scripts 
+Created by Geigus
+
+This set of bash scripts allows for easy starting and stopping of a Minecraft bedrock server on a Linux machine.
+I use this set of scripts to run a Minecraft Bedrock server on an Oracle Cloud VM (avalible for free!).
+
+TO USE:
+1. Download bedrock server zip and extract into this directory 
+2. Set server path and name in config_server.sh
+3. Run start_server.sh to start
+4. Run stop_server.sh to shut down
+5. Allow connections on the ports you will be using. If you are using firewalld, this can be done by running firewall-cmd --zone=public --add-port=19132-19133/tcp && firewall-cmd --zone=public --add-port=19132-19133/udp (Change the port numbers if not using the default)
+6. Mark all downloaded files as executable (chmod +x \*_server.sh && chmod +x bedrock_server\*)
+
+DEPENDENCIES:
+This makes use of the following programs that may need to be installed seperately:
+1. Screen
+2. inotify-tools

@@ -8,6 +8,7 @@
 SERVER_NAME="minecraft-server"
 
 # Directory path to server folder location, default should automatically get the server path, but change it if something doesn't work
+# DEFAULT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )
 SOURCE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )
 
 # The following lines are planned, but are not yet functional
