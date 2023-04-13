@@ -5,7 +5,7 @@ source ./config_server.sh
 
 #--- INITIALIZE SERVER ---
 
-# Check if server is already runningh
+# Check if server is already running
 CHECK=`screen -ls | grep -o $SERVER_NAME`
 if [ "$CHECK" == "$SERVER_NAME" ]
 then

@@ -8,13 +8,14 @@ BedrockDownloadedServerFiles/
 behavior_packs/
 config/
 definitions/
+development_behavior_packs/
 development_resource_packs/
+development_skin_packs/
 minecraftpe/
 premium_cache/
 resource_packs/
 world_templates/
 worlds/
-Dedicated_Server.txt
 bedrock_server
 bedrock_server_symbols.debug
 release-notes.txt

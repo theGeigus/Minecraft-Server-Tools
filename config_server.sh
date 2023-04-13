@@ -2,13 +2,13 @@
 
 # This file contains the configuration for all server script files (*_server.sh).
 # Allows all variables to be set in one convienient location instead of within each file.
-# Created by Geigus - based on work by ZiggidyZ and Phosix
+# Created by Geigus
 
 # Name of the file containing the server - also used as the name of the screen
-SERVER_NAME="minecraft_bedrock"
+SERVER_NAME="minecraft-server-tools"
 
 # Directory path to server folder location (do not include server folder in this)
-SOURCE_PATH="/home/ubuntu"
+SOURCE_PATH="/home/$USER_NAME"
 
 # The following lines are planned, but are not yet functional
 # Enable daily automatic world backups
