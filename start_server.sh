@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Import variables
+# Change directory and import variables
+cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 source ./config_server.sh
 
 
@@ -26,9 +27,9 @@ CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 if [ "$CHECK" != "$SERVER_NAME" ]
 then
 	echo "Server failed to start!"
-	exit 0
+	exit 1
 fi
-	
+
 # Set day and weather cycle to false until a player joins
 screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle false \r"
 screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle false \r"
@@ -51,21 +52,34 @@ do
 	inotifywait -q -q -e MODIFY serverLog
 	if [ "$(tail -3 serverLog | grep -o 'Player connected:')" == "Player connected:" ]
 	then
-		{ echo "---"; 
-		"Player Connected - Restarting time!"; 
-		echo "---"; } >> serverLog
+
+		# I think I'm making this more complicated than it needs to be... Oh well, gotta love grep
+		PLAYER_NAME=$(grep "Player connected" serverLog | grep -o ': .* xuid' | awk '{ print substr($0, 2, length($0)-7) }')
+
+		echo "Player Connected - Restarting time!" >> serverLog
 
 		# Set day and weather cycle to false
 		screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle true \r"
 		screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle true \r"
 
+		# Send player a message after they spawn to make sure they recieve it
+		( while [ "$(tail -3 serverLog | grep -o 'Player Spawned:')" != "Player Spawned:" ] ### Should add counter to cancel if player disconnects before spawning
+		do
+		inotifywait -q -q -e MODIFY serverLog
+		done
+
+		sleep 1
+
+		while read -r LINE
+		do
+		  screen -Rd "$SERVER_NAME" -X stuff "tellraw $PLAYER_NAME {\"rawtext\": [{\"text\": \"$LINE\"}]} \r"
+		done < "announcements.txt" ) &
+
 	else
 		# If player disconnects, check for remaining players
 		if [ "$(tail -3 serverLog | grep -o 'Player disconnected:')" == "Player disconnected:" ]
 		then
-			{ echo "---";
-			echo "Player Disconnected - Checking for remaining players.";
-			echo "---"; } >> serverLog
+			echo "Player Disconnected - Checking for remaining players." >> serverLog
 
 			screen -Rd "$SERVER_NAME" -X stuff "list \r"
 
@@ -73,9 +87,8 @@ do
 			inotifywait -q -q -e MODIFY serverLog > /dev/null
 			if [ "$(tail -3 serverLog | grep -o 'There are 0')" == "There are 0" ]
 			then
-				{ echo "---";
-				echo "There are no players currently online - pausing time!";
-				echo "---"; }  >> serverLog
+
+				echo "There are no players currently online - pausing time!" >> serverLog
 
 				# Set day and weather cycle to false
 				screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle false \r"

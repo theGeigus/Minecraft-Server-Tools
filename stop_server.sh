@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Import variables
+# Change directory and import variables
+cd "$(dirname "${BASH_SOURCE[0]}")"
 source ./config_server.sh
 
 #--- STOP SERVER ---
@@ -24,10 +25,10 @@ fi
 CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 if [ "$CHECK" == "$SERVER_NAME" ]
 then
-	echo "Server failed to shutdown - Attempting to force shutdown"
+	echo "Server failed to shutdown - Attempting to quit shutdown"
 
 	# Tell screen to quit
-	screen -Rd "$SERVER_NAME" -X stuff "^A :quit" > /dev/null
+	screen -Rd "$SERVER_NAME" -X stuff "^A :quit \r" > /dev/null
 
 	sleep 2
 
@@ -35,9 +36,18 @@ then
 	CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
-		echo "Server failed to shutdown - Could not terminate screen"
+		echo "One more try - Attempting to terminate screen"
+		screen -Rd "$SERVER_NAME" -X stuff "^C" > /dev/null
+
+		if [ "$CHECK" == "$SERVER_NAME" ]
+        	then
+                	echo "Server has been terminated successfully"
+        	else
+                	echo "Server has been terminated successfully"
+        	fi
+
 	else
-		echo "Server has been terminated successfully"
+		echo "Server has been quit successfully"
 	fi
 else
 	echo "Server has shut down successfully!"

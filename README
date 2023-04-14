@@ -14,5 +14,8 @@ TO USE:
 
 DEPENDENCIES:
 This makes use of the following programs that may need to be installed seperately:
-1. Screen
-2. inotify-tools
+- Screen
+- inotify-tools
+
+OTHER THINGS YOU CAN DO:
+- You can set server announcements that show any time a player joins the game! You can also use Minecraft's color codes if you want!

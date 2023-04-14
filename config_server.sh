@@ -7,7 +7,7 @@
 # Used as the name of the screen, can be anything but needs to be unique if running multiple servers.
 SERVER_NAME="minecraft-server"
 
-# Directory path to server folder location, default should automatically get the server path, but change it if something doesn't work
+# Directory path to server folder location, default should automatically get the server path, but you can change this if you want your server and script files in seperate locations
 # DEFAULT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )
 SOURCE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
@@ -20,6 +20,3 @@ BACKUP_PATH="/home/$USER/Backups/$SERVER_NAME"
 
 # Number of daily backups to keep
 BACKUP_NUM=5
-
-
-export SOURCE_PATH, WORLD_BACKUP, BACKUP_PATH, BACKUP_NUM

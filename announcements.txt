@@ -1,0 +1,3 @@
+§9This is a test of the announcement system:
+§cIf you can see this...
+§eIt works properly!!!
