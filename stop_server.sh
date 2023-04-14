@@ -6,7 +6,7 @@ source ./config_server.sh
 #--- STOP SERVER ---
 
 # Check if server is running, exit if false
-CHECK=`screen -ls | grep -o $SERVER_NAME`
+CHECK=$(screen -ls | grep -o $SERVER_NAME)
 if [ "$CHECK" == "$SERVER_NAME" ]
 then
 	echo "Shutting down server!"
@@ -21,18 +21,18 @@ else
 fi
 
 # Check if the server was actually closed
-CHECK=`screen -ls | grep -o $SERVER_NAME`
+CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 if [ "$CHECK" == "$SERVER_NAME" ]
 then
 	echo "Server failed to shutdown - Attempting to force shutdown"
 
 	# Tell screen to quit
-	screen -Rd $SERVER_NAME -X stuff "^A :quit" > /dev/null
+	screen -Rd "$SERVER_NAME" -X stuff "^A :quit" > /dev/null
 
 	sleep 2
 
 	# Check if server shut down
-	CHECK=`screen -ls | grep -o $SERVER_NAME`
+	CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
 		echo "Server failed to shutdown - Could not terminate screen"
