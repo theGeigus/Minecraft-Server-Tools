@@ -4,18 +4,43 @@ Created by Geigus
 This set of bash scripts allows for easy starting and stopping of a Minecraft bedrock server on a Linux machine.
 I use this set of scripts to run a Minecraft Bedrock server on an Oracle Cloud VM (avalible for free!).
 
-TO USE:
-1. Download bedrock server zip and extract into this directory 
-2. Set server path and name in config_server.sh
-3. Run start_server.sh to start
-4. Run stop_server.sh to shut down
-5. Allow connections on the ports you will be using. If you are using firewalld, this can be done by running firewall-cmd --zone=public --add-port=19132-19133/tcp && firewall-cmd --zone=public --add-port=19132-19133/udp (Change the port numbers if not using the default)
-6. Mark all downloaded files as executable (chmod +x \*_server.sh && chmod +x bedrock_server\*)
+Designed for Linux systems, however this should also work on MacOS without configuration and Windows with WSL enabled if you needed to run it on one of these (Untested on both) 
+Any instructions given will be written with Linux in mind.
+
+
+
+FEATURES:
+
+- Easily starting and stopping server without need to memorize commands.
+- Monitering of player joining and leaving.
+- Automatic pausing/resuming of day/weather cycle when players join and leave.
+- Ability to set server announcements that show any time a player joins the game.
+- Abitily to set script settings in ./config_server.sh such as auto pausing, auto update, and auto backups (LAST TWO OPTIONS STILL UNRELEASED)
+
+
 
 DEPENDENCIES:
+
 This makes use of the following programs that may need to be installed seperately:
 - Screen
 - inotify-tools
 
-OTHER THINGS YOU CAN DO:
-- You can set server announcements that show any time a player joins the game! You can also use Minecraft's color codes if you want!
+
+
+SETUP GUIDE:
+
+1. Clone the repo or download and extract the zip.
+2. Download bedrock server zip and extract into the same directory, get it from: https://www.minecraft.net/en-us/download/server/bedrock (THIS IS TEMPORARY)
+3. Set your server data in server.properties, such as name, port, difficulty, etc.
+4. Run ./start_server.sh to start your server, the first run of your server should automatically create your world files.
+5. From this point you should be able to leave your server running, but if you need to shut it down for any reason, run ./stop_server.sh
+
+
+
+TROUBLESHOOTING:
+
+Can't run any of the files:
+- Mark all downloaded files as executable and try again (On Linux, use 'chmod +x FILENAME' to mark each as executable)
+
+Can not open connection to ports:
+- Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running 'firewall-cmd --zone=public --add-port=19132-19133/tcp && firewall-cmd --zone=public --add-port=19132-19133/udp' (Change the port numbers if not using the defaults)

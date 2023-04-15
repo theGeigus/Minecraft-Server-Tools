@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change directory and import variables
-cd "$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")" ||  echo "Something broke, could not find directory?"
 source ./config_server.sh
 
 #--- STOP SERVER ---
