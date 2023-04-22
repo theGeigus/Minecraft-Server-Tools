@@ -19,6 +19,7 @@ fi
 # Clear previous log file and link it to the screen
 echo "" > serverLog
 screen -dmS "$SERVER_NAME" -L -Logfile serverLog bash -c "LD_LIBRARY_PATH=${SOURCE_PATH}/ ${SOURCE_PATH}/bedrock_server"
+screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
 echo "Server is now starting!"
 
@@ -63,23 +64,30 @@ do
 		screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle true \r"
 
 		# Send player a message after they spawn to make sure they recieve it
-		( while [ "$(tail -3 serverLog | grep -o 'Player Spawned:')" != "Player Spawned:" ] ### Should add counter to cancel if player disconnects before spawning
+		COUNT=0
+		( while [ "$(tail -10 serverLog | grep -o 'Player Spawned:')" != "Player Spawned:" ] && [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
 		do
 		inotifywait -q -q -e MODIFY serverLog
 		done
 
+		COUNT+=1
 		sleep 1
 
+		ANNOUNCEMENT=""
 		while read -r LINE
 		do
-		  screen -Rd "$SERVER_NAME" -X stuff "tellraw $PLAYER_NAME {\"rawtext\": [{\"text\": \"$LINE\"}]} \r"
-		done < "announcements.txt" ) &
+		ANNOUNCEMENT+="$LINE\\\n"
+		done < "announcements.txt" 
+		
+		screen -Rd "$SERVER_NAME" -X stuff "tellraw $PLAYER_NAME {\"rawtext\": [{\"text\": \"$ANNOUNCEMENT\"}]} \r"
+
+		) &
+
 
 	else
 		# If player disconnects, check for remaining players
 		if [ "$(tail -3 serverLog | grep -o 'Player disconnected:')" == "Player disconnected:" ]
 		then
-			echo "Player Disconnected - Checking for remaining players." >> serverLog
 
 			screen -Rd "$SERVER_NAME" -X stuff "list \r"
 

@@ -12,6 +12,21 @@ if [ "$CHECK" == "$SERVER_NAME" ]
 then
 	echo "Shutting down server!"
 
+	screen -Rd "$SERVER_NAME" -X stuff "list \r"
+	inotifywait -qq -e MODIFY serverLog > /dev/null
+			# Check if any players are currently online
+			if [ "$(tail -3 serverLog | grep -o 'There are 0')" != "There are 0" ]
+			then
+			read -r -p "There are players still online. Are you sure you want to shut down now? [y/N] " VAL
+				if [[ ! "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]]
+				then
+					echo Canceled
+					exit 0
+				else
+					echo "Continuing shutdown."
+				fi
+			fi
+
 	# Send the server a stop message
 	screen -Rd $SERVER_NAME -X stuff "stop \r"
 
