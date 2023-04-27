@@ -43,4 +43,7 @@ Can't run any of the files:
 - Mark all downloaded files as executable and try again (On Linux, use 'chmod +x FILENAME' to mark each as executable)
 
 Can not open connection to ports:
-- Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running 'firewall-cmd --zone=public --add-port=19132-19133/tcp --add-port=19132-19133/udp && firewall-cmd --reload' (Change the port numbers if not using the defaults)
+- Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running the following (change port numbers if you are not using the defaults):
+    firewall-cmd --zone=public --permanent --add-port=19132-19133/tcp 
+    firewall-cmd --zone=public --permanent --add-port=19132-19133/udp 
+    firewall-cmd --reload

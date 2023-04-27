@@ -2,6 +2,7 @@ backup_and_update.sh
 serverLog
 
 allowlist.json*
+announcements.txt
 server.properties*
 permissions.json*
 BedrockDownloadedServerFiles/

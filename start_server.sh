@@ -2,8 +2,10 @@
 
 # Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
-source ./config_server.sh
+source ./config_server.sh || exit 1
 
+#Create announcent file if missing. Should eventually be moved to update script.
+touch announcements.txt
 
 #--- INITIALIZE SERVER ---
 
@@ -55,7 +57,7 @@ do
 	then
 
 		# I think I'm making this more complicated than it needs to be... Oh well, gotta love grep
-		PLAYER_NAME=$(grep "Player connected" serverLog | grep -o ': .* xuid' | awk '{ print substr($0, 2, length($0)-7) }')
+		PLAYER_NAME=$(tail -3 serverLog | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 2, length($0)-7) }')
 
 		echo "Player Connected - Restarting time!" >> serverLog
 
@@ -65,7 +67,7 @@ do
 
 		# Send player a message after they spawn to make sure they recieve it
 		COUNT=0
-		( while [ "$(tail -10 serverLog | grep -o 'Player Spawned:')" != "Player Spawned:" ] && [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
+		( while [ "$(tail -3 serverLog | grep -o 'Player Spawned:')" != "Player Spawned:" ] && [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
 		do
 		inotifywait -q -q -e MODIFY serverLog
 		done
