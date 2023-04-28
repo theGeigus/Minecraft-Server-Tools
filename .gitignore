@@ -1,11 +1,18 @@
+#My ignored files
 backup_and_update.sh
 serverLog
-
-allowlist.json*
+BedrockDownloadedServerFiles/
 announcements.txt
+adminAnnouncements.txt
+.hasSeenAnnouncement
+.prevAnnouncement
+.hasSeenAdminAnnouncement
+.prevAdminAnnouncement
+
+#Minecraft's files
+allowlist.json*
 server.properties*
 permissions.json*
-BedrockDownloadedServerFiles/
 behavior_packs/
 config/
 definitions/
@@ -15,6 +22,7 @@ development_skin_packs/
 minecraftpe/
 premium_cache/
 resource_packs/
+treatments/
 world_templates/
 worlds/
 bedrock_server
