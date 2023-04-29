@@ -10,7 +10,7 @@ touch announcements.txt
 #--- INITIALIZE SERVER ---
 
 # Check if server is already running
-if screen -ls | grep -q -o "$SERVER_NAME"
+if [ "$(screen -ls | grep -q -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 then
 	echo "The server is already running"
 	exit 0
@@ -30,6 +30,8 @@ if [ "$CHECK" != "$SERVER_NAME" ]
 then
 	echo "Server failed to start!"
 	exit 1
+else
+	echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 fi
 
 # Set day and weather cycle to false until a player joins
@@ -39,12 +41,8 @@ then
 	screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle false \r"
 fi
 
-inotifywait -qq -e MODIFY serverLog
-
 # An excessive number of grep uses to pull a single number (>_<)
 PORT=$(grep "IPv4" serverLog | grep -o -P " port: \d+" | grep -o -P "\d+")
-
-echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 
 
 
@@ -55,7 +53,7 @@ while screen -ls | grep -q -o "$SERVER_NAME"
 do
 	# Wait for log update, if player connects set day and weather cycle to true
 	inotifywait -qq -e MODIFY serverLog
-	if tail -3 serverLog | grep -q -o 'Player connected:'
+	if [ "$(tail -3 serverLog | grep -q -o 'Player connected:')" == 'Player connected:' ]
 	then
 
 		# I think I'm making this more complicated than it needs to be... Oh well, gotta love grep
@@ -74,96 +72,18 @@ do
 		# Check if announcement actually has text in it.
 		
 		# Send player a message after they spawn to make sure they recieve it
-		COUNT=0
-		( while tail -3 serverLog | grep -q -o 'Player Spawned:' && [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
+		( while [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
 		do
-			inotifywait -qq -e MODIFY serverLog
-			COUNT+=1
+			if [ "$(tail -3 serverLog | grep -q -o 'Player Spawned:')" == 'Player Spawned:' ]
+			then
+				./announce_server;.sh "$PLAYER_NAME"
+				break
+			else
+				inotifywait -qq -e MODIFY serverLog
+				((COUNT+=1))
+			fi
 		done
-
-		### While functional, the entire announcement section is kind of a mess... Fix?
-		if tail -3 serverLog | grep -q -o 'Player Spawned:'
-		then
-			# Announcement system, defined as a function for easy use with cases below.
-			printAnnouncements(){
-				if grep -q -P -m 1 "[^s]" $ANNOUNCEMENT_FILE
-				then
-					# Add each line to the announcement
-					ANNOUNCEMENT=""
-					while read -r LINE
-					do
-						ANNOUNCEMENT+="$LINE\\\n"
-					done < $ANNOUNCEMENT_FILE 
-
-					# Wait 2 sec to make sure player actually recieves it.
-					sleep 2;
-
-					# Print message with tellraw
-					screen -Rd "$SERVER_NAME" -X stuff "tellraw $PLAYER_NAME {\"rawtext\": [{\"text\": \"$ANNOUNCEMENT\"}]} \r"
-				fi
-			}
-
-				# Cases for Announcement handling, check if enabled
-			if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
-			then
-				touch announcements.txt
-				touch .hasSeenAnnouncement
-				ANNOUNCEMENT_FILE="announcements.txt"
-				# If set to once, check if seen
-				if [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
-				then 
-				
-					if [ "$(grep -o "$PLAYER_NAME" .hasSeenAnnouncement)" != "$PLAYER_NAME" ]
-					then
-						echo "$PLAYER_NAME" >> .hasSeenAnnouncement
-						printAnnouncements;
-					else
-						# Check if announcement has been changed.
-						if ! cmp --silent announcements.txt .prevAnnouncement 
-						then
-							echo "$PLAYER_NAME" > .hasSeenAnnouncement
-							cat announcements.txt > .prevAnnouncement
-							printAnnouncements;
-						fi
-					fi
-				else
-					printAnnouncements;
-				fi
-			fi
-
-			# Cases for admin announcement handleing
-			if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
-			then
-				touch adminAnnouncements.txt
-				touch .hasSeenAdminAnnouncement
-				ANNOUNCEMENT_FILE="adminAnnouncements.txt"
-				# If set to once, check if seen
-				if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ]
-				then
-					if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] 
-					then
-						if [ "$( grep -o "$PLAYER_NAME" .hasSeenAdminAnnouncement)" != "$PLAYER_NAME" ]
-						then
-							echo "$PLAYER_NAME" >> .hasSeenAdminAnnouncement
-							printAnnouncements;
-						else
-							# Check if announcement has been changed.
-							if ! cmp --silent adminAnnouncements.txt .prevAdminAnnouncement 
-							then
-								echo "$PLAYER_NAME" > .hasSeenAdminAnnouncement
-								cat adminAnnouncements.txt > .prevAdminAnnouncement
-								printAnnouncements;
-							fi
-						fi
-					else
-						printAnnouncements;
-					fi
-				fi
-			fi
-		fi
-
 		)&
-
 
 	else
 		# If player disconnects, check for remaining players
