@@ -4,17 +4,13 @@
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 source ./config_server.sh || exit 1
 
-#Create announcent file if missing. Should eventually be moved to update script.
-touch announcements.txt
-
 #--- INITIALIZE SERVER ---
 
 # Check if server is already running
-if [ "$(screen -ls | grep -q -o "$SERVER_NAME")" == "$SERVER_NAME" ]
+if [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 then
 	echo "The server is already running"
 	exit 0
-
 fi
 
 # Clear previous log file and link it to the screen
@@ -49,11 +45,11 @@ PORT=$(grep "IPv4" serverLog | grep -o -P " port: \d+" | grep -o -P "\d+")
 #--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
 
 # Loop while server is running
-while screen -ls | grep -q -o "$SERVER_NAME"
+while [ "$(screen -ls | grep  -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 do
 	# Wait for log update, if player connects set day and weather cycle to true
 	inotifywait -qq -e MODIFY serverLog
-	if [ "$(tail -3 serverLog | grep -q -o 'Player connected:')" == 'Player connected:' ]
+	if [ "$(tail -3 serverLog | grep -o 'Player connected:')" == 'Player connected:' ]
 	then
 
 		# I think I'm making this more complicated than it needs to be... Oh well, gotta love grep
@@ -72,11 +68,12 @@ do
 		# Check if announcement actually has text in it.
 		
 		# Send player a message after they spawn to make sure they recieve it
-		( while [ "$COUNT" -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
+		COUNT=0
+		( while [ $COUNT -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
 		do
-			if [ "$(tail -3 serverLog | grep -q -o 'Player Spawned:')" == 'Player Spawned:' ]
+			if [ "$(tail -3 serverLog | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
 			then
-				./announce_server;.sh "$PLAYER_NAME"
+				./announce_server.sh "$PLAYER_NAME"
 				break
 			else
 				inotifywait -qq -e MODIFY serverLog

@@ -55,7 +55,7 @@ then
     touch .hasSeenAdminAnnouncement
     ANNOUNCEMENT_FILE="adminAnnouncements.txt"
     # If set to once, check if seen
-    if echo "$ADMIN_LIST" | grep -q -o "$1"
+    if [ "$(echo "$ADMIN_LIST" | grep -o "$1")" == "$1" ]
     then
         if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] 
         then
