@@ -7,7 +7,8 @@ source ./config_server.sh || exit 1
 #--- STOP SERVER ---
 stopServer(){
 	# Check if server is running, exit if false
-	if screen -ls | grep -q -o "$SERVER_NAME"
+	CHECK=$(screen -ls | grep -o $SERVER_NAME)
+	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
 		echo "Shutting down server!"
 
@@ -50,7 +51,8 @@ stopServer(){
 	fi
 
 	# Check if the server was actually closed
-	if screen -ls | grep -q -o "$SERVER_NAME"
+	CHECK=$(screen -ls | grep -o "$SERVER_NAME")
+	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
 		echo "Server failed to shutdown - Attempting to quit shutdown"
 
@@ -60,7 +62,8 @@ stopServer(){
 		sleep 2
 
 		# Check if server shut down
-		if screen -ls | grep -o "$SERVER_NAME"
+		CHECK=$(screen -ls | grep -o "$SERVER_NAME")
+		if [ "$CHECK" == "$SERVER_NAME" ]
 		then
 			echo "One more try - Attempting to terminate screen"
 			screen -Rd "$SERVER_NAME" -X stuff "^C" > /dev/null
