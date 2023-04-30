@@ -52,7 +52,7 @@ do
 	if [ "$(tail -3 serverLog | grep -o 'Player connected:')" == 'Player connected:' ]
 	then
 
-		# I think I'm making this more complicated than it needs to be... Oh well, gotta love grep
+		# I think I'm making this more complicated than it needs to be... Oh well
 		PLAYER_NAME=$(tail -3 serverLog | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 3, length($0)-8) }')
 
 		echo "Player Connected - Restarting time!" >> serverLog

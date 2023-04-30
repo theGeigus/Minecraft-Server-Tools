@@ -1,6 +1,15 @@
 #! /bin/bash
-### While functional, the entire announcement section is kind of a mess... Fix?
+
 source ./config_server.sh
+
+# If no player name is supplied, announce to everyone.
+if [ "$1" == "" ]
+then
+    PLAYER_NAME="@a"
+else
+    PLAYER_NAME="$1"
+fi
+
 # Announcement system, defined as a function for easy use with cases below.
 printAnnouncements(){
     if grep -q -P -m 1 "[^s]" $ANNOUNCEMENT_FILE
@@ -16,7 +25,7 @@ printAnnouncements(){
         sleep 2;
 
         # Print message with tellraw
-        screen -Rd "$SERVER_NAME" -X stuff "tellraw $1 {\"rawtext\": [{\"text\": \"$ANNOUNCEMENT\"}]} \r"
+        screen -Rd "$SERVER_NAME" -X stuff "tellraw $PLAYER_NAME {\"rawtext\": [{\"text\": \"$ANNOUNCEMENT\"}]} \r"
     fi
 }
 
@@ -30,15 +39,15 @@ then
     if [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
     then 
     
-        if ! grep -q -o "$1" .hasSeenAnnouncement 
+        if ! grep -q -o "$PLAYER_NAME" .hasSeenAnnouncement 
         then
-            echo "$1" >> .hasSeenAnnouncement
+            echo "$PLAYER_NAME" >> .hasSeenAnnouncement
             printAnnouncements "$@"
         else
             # Check if announcement has been changed.
             if ! cmp --silent announcements.txt .prevAnnouncement 
             then
-                echo "$1" > .hasSeenAnnouncement
+                echo "$PLAYER_NAME" > .hasSeenAnnouncement
                 cat announcements.txt > .prevAnnouncement
                 printAnnouncements "$@"
             fi
@@ -55,19 +64,19 @@ then
     touch .hasSeenAdminAnnouncement
     ANNOUNCEMENT_FILE="adminAnnouncements.txt"
     # If set to once, check if seen
-    if [ "$(echo "$ADMIN_LIST" | grep -o "$1")" == "$1" ]
+    if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ]
     then
         if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] 
         then
-            if ! grep -q -o "$1" .hasSeenAdminAnnouncement
+            if ! grep -q -o "$PLAYER_NAME" .hasSeenAdminAnnouncement
             then
-                echo "$1" >> .hasSeenAdminAnnouncement
+                echo "$PLAYER_NAME" >> .hasSeenAdminAnnouncement
                 printAnnouncements "$@"
             else
                 # Check if announcement has been changed.
                 if ! cmp --silent adminAnnouncements.txt .prevAdminAnnouncement 
                 then
-                    echo "$1" > .hasSeenAdminAnnouncement
+                    echo "$PLAYER_NAME" > .hasSeenAdminAnnouncement
                     cat adminAnnouncements.txt > .prevAdminAnnouncement
                     printAnnouncements "$@"
                 fi

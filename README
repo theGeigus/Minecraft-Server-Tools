@@ -32,7 +32,7 @@ This makes use of the following programs that may need to be installed seperatel
 SETUP GUIDE:
 
 1. Clone the repo or download and extract the zip.
-2. Download bedrock server zip and extract into the same directory, get it from: https://www.minecraft.net/en-us/download/server/bedrock (THIS IS TEMPORARY)
+2. Run update_server.sh to install Minecraft.
 3. Set your server data in server.properties, such as name, port, difficulty, etc.
 4. Run ./start_server.sh to start your server, the first run of your server should automatically create your world files.
 5. From this point you should be able to leave your server running, but if you need to shut it down for any reason, run ./stop_server.sh

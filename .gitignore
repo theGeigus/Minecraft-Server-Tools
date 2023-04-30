@@ -8,6 +8,7 @@ adminAnnouncements.txt
 .prevAnnouncement
 .hasSeenAdminAnnouncement
 .prevAdminAnnouncement
+minecraft.version
 
 #Minecraft's files
 allowlist.json*
