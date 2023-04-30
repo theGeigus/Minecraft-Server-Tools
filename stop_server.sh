@@ -14,35 +14,36 @@ stopServer(){
 		screen -Rd "$SERVER_NAME" -X stuff "list \r"
 		inotifywait -qq -e MODIFY serverLog > /dev/null
 		# Check if any players are currently online, or if TIME is set
-		if ! [ "$TIME" -ge 0 ] && [ "$(tail -3 serverLog | grep -o 'There are 0')" != "There are 0" ]
+		if [ "$TIME" != 0 ] && [ "$(tail -3 serverLog | grep -o 'There are 0')" != "There are 0" ]
 		then
-		read -r -p "There are players still online. Are you sure you want to shut down now? [y/N] " VAL
+			# If time is set, send warning message - TODO: eventually add time intervals for messaging
+			if [ "$TIME" -ge 0 ]
+			then
+				# Yes, had to fix grammar even for something as trivial as this...
+				if [ "$TIME" == 1 ]
+				then
+					MINUTE="minute"
+				else
+					MINUTE="minutes"
+				fi
+
+				echo "There are currently players online. Delaying server shutdown by $TIME $MINUTE."
+
+				### TODO: This should eventually support custom messages as well (such as when updating).
+				screen -Rd "$SERVER_NAME" -X stuff "tellraw @a {\"rawtext\": [{\"text\": \"The server is scheduled for shutdown in $TIME $MINUTE!\"}]} \r" 
+				sleep $((TIME*60))
+			else
+			read -r -p "There are players still online. Are you sure you want to shut down now? [y/N] " VAL
+
 			if [[ ! "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]]
 			then
 				echo Canceled
 				exit 0
-			else
-				echo "Continuing shutdown."
+			fi
+
 			fi
 		fi
 		
-		# If time is set, send warning message - TODO: eventually add time intervals for messaging
-		if [ "$TIME" -ge 0 ]
-		then
-			# Yes, had to fix grammar even for something as trivial as this...
-			if [ "$TIME" == 1 ]
-			then
-				MINUTE="minute"
-			else
-				MINUTE="minutes"
-			fi
-
-			echo "There are currently players online. Delaying server shutdown by $TIME $MINUTE."
-			
-			### TODO: This should eventually support custom messages as well (such as when updating).
-			screen -Rd "$SERVER_NAME" -X stuff "tellraw @a {\"rawtext\": [{\"text\": \"The server is scheduled for shutdown in $TIME $MINUTE!\"}]} \r" 
-			sleep $((TIME*60))
-		fi
 		echo "Shutting down server!"
 
 		# Send the server a stop message
