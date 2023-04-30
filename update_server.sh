@@ -12,13 +12,13 @@ wget -q --show-progress -O "minecraft-server-files.zip" "$FILE_LINK"
 echo "Finished downloading files"
 
 echo "Making a copy of your server files so the new ones won't overwrite them..."
-mv allowlist.json allowlist.json.old
-mv behavior_packs behavior_packs.old
-mv config config.old
-mv definitions definitions.old
-mv permissions.json permissions.json.old
-mv resource_packs resource_packs.old
-mv server.properties server.properties.old
+mv ./allowlist.json ./allowlist.json.old
+mv ./behavior_packs/ ./behavior_packs.old/
+mv ./config/ ./config.old/
+mv ./definitions/ ./definitions.old/
+mv ./permissions.json ./permissions.json.old
+mv ./resource_packs/ ./resource_packs.old/
+mv ./server.properties server.properties.old
 echo "Copies created"
 
 echo "Extracting files..."
@@ -26,11 +26,11 @@ unzip -o "minecraft-server-files.zip" > /dev/null && rm "minecraft-server-files.
 echo "Extraction complete!"
 
 echo "Finally, restoring copies..."
-mv -f allowlist.json.old allowlist.json
-mv -f behavior_packs.old behavior_packs
-mv -f config config.old
-mv -f definitions.old definitions
-mv -f permissions.json.old permissions.json
-mv -f resource_packs.old resource_packs
-mv -f server.properties.old server.properties
+mv -f ./allowlist.json.old ./allowlist.json
+mv -f ./behavior_packs.old/ ./behavior_packs/
+mv -f ./config.old/ ./config/
+mv -f ./definitions.old/ ./definitions/
+mv -f ./permissions.json.old ./permissions.json
+mv -f ./resource_packs.old/ ./resource_packs/
+mv -f ./server.properties.old ./server.properties
 echo "Done! Your server is now up-to-date!"
