@@ -23,6 +23,7 @@ DEPENDENCIES:
 
 This makes use of the following programs that may need to be installed seperately:
 - screen
+- wget
 - inotify-tools
 
 
