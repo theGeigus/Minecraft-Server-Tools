@@ -30,6 +30,9 @@ fi
 wget -q --show-progress -O "minecraft-server-files.zip" "$FILE_LINK"
 echo "Finished downloading files"
 
+# Stop server if running, wait 15 minutes if there are players online
+./stop_server.sh -t 15 || exit 1
+
 # Copy these files so they are not overwritten by the update
 echo "Making a copy of your server files so the new ones won't overwrite them..."
 mv ./allowlist.json ./allowlist.json.old && echo "• Copied allowlist.json"
@@ -57,3 +60,6 @@ mv -f ./server.properties.old ./server.properties && echo "• Restored server.p
 echo "Done! Your server is now updated to version $VERSION_NUM."
 
 echo "$VERSION_NUM" > minecraft.version
+
+# Restart server
+./start_server.sh

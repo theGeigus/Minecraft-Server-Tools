@@ -7,11 +7,10 @@ source ./config_server.sh || exit 1
 #--- STOP SERVER ---
 stopServer(){
 	# Check if server is running, exit if false
+	echo "Checking if server is running..."
 	CHECK=$(screen -ls | grep -o $SERVER_NAME)
 	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
-		echo "Shutting down server!"
-
 		screen -Rd "$SERVER_NAME" -X stuff "list \r"
 		inotifywait -qq -e MODIFY serverLog > /dev/null
 		# Check if any players are currently online, or if TIME is set
@@ -37,16 +36,21 @@ stopServer(){
 			else
 				MINUTE="minutes"
 			fi
-			screen -Rd "$SERVER_NAME" -X stuff "tellraw @a {\"rawtext\": [{\"text\": \"The server is scheduled for shutdown in $TIME $MINUTE!\"}]} \r"
+
+			echo "There are currently players online. Delaying server shutdown by $TIME $MINUTE."
+			
+			### TODO: This should eventually support custom messages as well (such as when updating).
+			screen -Rd "$SERVER_NAME" -X stuff "tellraw @a {\"rawtext\": [{\"text\": \"The server is scheduled for shutdown in $TIME $MINUTE!\"}]} \r" 
 			sleep $((TIME*60))
 		fi
+		echo "Shutting down server!"
 
 		# Send the server a stop message
 		screen -Rd $SERVER_NAME -X stuff "stop \r"
 
 		sleep 2
 	else
-		echo "Server failed to shutdown - Server was not running!"
+		echo "Server not running, skipping shutdown."
 		exit 0
 	fi
 
@@ -85,7 +89,7 @@ stopServer(){
 
 printHelp(){
 	echo "-h: Show this page and exit"
-	echo "-t NUMBER: set delay to stop the server, given in minutes. Ignores if players are online."
+	echo "-t NUMBER: set delay to stop the server, given in minutes. Ignored if there are no players are online."
 }
 
 TIME=-1
