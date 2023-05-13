@@ -1,0 +1,27 @@
+
+NO LOG FILE! - setting up server logging...
+[2023-05-10 21:19:55:411 INFO] Starting Server
+[2023-05-10 21:19:55:411 INFO] Version 1.19.81.01
+[2023-05-10 21:19:55:411 INFO] Session ID 3b45210e-ff0c-4428-88ac-6c3765ca9b03
+[2023-05-10 21:19:55:411 INFO] Build ID 1.19.81
+[2023-05-10 21:19:55:411 INFO] Branch r/19_u8
+[2023-05-10 21:19:55:411 INFO] Commit ID 2606f6a1a1e3ecf907cb776d138dac765c5ba3ff
+[2023-05-10 21:19:55:411 INFO] Configuration Publish
+[2023-05-10 21:19:55:411 INFO] Level Name: NameField
+[2023-05-10 21:19:55:412 INFO] Game mode: 0 Survival
+[2023-05-10 21:19:55:412 INFO] Difficulty: 3 HARD
+gamerule dodaylightcycle false 
+gamerule doweathercycle false 
+[2023-05-10 21:19:56:567 INFO] opening worlds/NameField/db
+[2023-05-10 21:19:56:977 INFO] IPv4 supported, port: 19132: Used for gameplay and LAN discovery
+[2023-05-10 21:19:56:977 INFO] IPv6 supported, port: 19133: Used for gameplay
+[2023-05-10 21:19:56:142 INFO] Server started.
+Game rule dodaylightcycle has been updated to false
+Game rule doweathercycle has been updated to false
+list 
+There are 0/10 players online:
+
+stop 
+[2023-05-10 21:20:05:452 INFO] Server stop requested.
+[2023-05-10 21:20:05:472 INFO] Stopping server...
+Quit correctly

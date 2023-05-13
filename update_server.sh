@@ -1,7 +1,27 @@
 #!/bin/bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
-source ./config_server.sh || exit 1
+
+if ! [ -f "./server.config" ]
+then
+    echo 'File server.config does not exist... Creating config file!'
+
+    source .configDefaults.txt
+
+    while read -r LINE
+    do
+       if [ "${LINE:0:1}" == '#' ]
+       then
+            echo "$LINE" >> server.config
+        else
+            eval echo "$LINE" >> server.config
+        fi
+    done < ".baseConfig.txt"
+
+    echo "Config file created"
+fi
+
+source ./server.config
 
 URL="https://www.minecraft.net/en-us/download/server/bedrock" # If planning on Java support in the future, this URL should be set based on the edition we are using.
 AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"

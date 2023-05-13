@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source ./config_server.sh
+source ./server.config
 
 # If no player name is supplied, announce to everyone.
 if [ "$1" == "" ]
@@ -60,9 +60,9 @@ fi
 # Cases for admin announcement handleing
 if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
 then
-    touch adminAnnouncements.txt
+    touch .adminAnnouncements.txt
     touch .hasSeenAdminAnnouncement
-    ANNOUNCEMENT_FILE="adminAnnouncements.txt"
+    ANNOUNCEMENT_FILE=".adminAnnouncements.txt"
     # If set to once, check if seen
     if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ]
     then
@@ -74,10 +74,10 @@ then
                 printAnnouncements "$@"
             else
                 # Check if announcement has been changed.
-                if ! cmp --silent adminAnnouncements.txt .prevAdminAnnouncement 
+                if ! cmp --silent .adminAnnouncements.txt .prevAdminAnnouncement
                 then
                     echo "$PLAYER_NAME" > .hasSeenAdminAnnouncement
-                    cat adminAnnouncements.txt > .prevAdminAnnouncement
+                    cat .adminAnnouncements.txt > .prevAdminAnnouncement
                     printAnnouncements "$@"
                 fi
             fi
