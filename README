@@ -49,3 +49,10 @@ Can not open connection to ports:
     firewall-cmd --zone=public --permanent --add-port=19132-19133/tcp 
     firewall-cmd --zone=public --permanent --add-port=19132-19133/udp 
     firewall-cmd --reload
+
+
+OTHER THINGS:
+
+Announcements can be sent through the command line instead of through a file if desired, the syntax for this is:
+    ./announce_server.sh $ANNOUNCEMENT $PLAYER_NAME
+$PLAYER_NAME is not required, will send to all players if not specified

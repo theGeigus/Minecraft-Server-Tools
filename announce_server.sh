@@ -5,11 +5,11 @@
 source ./server.config
 
 # If no player name is supplied, announce to everyone.
-if [ "$1" == "" ]
+if [ "$2" == "" ]
 then
     PLAYER_NAME="@a"
 else
-    PLAYER_NAME="$1"
+    PLAYER_NAME="$2"
 fi
 
 # Announcement system, defined as a function for easy use with cases below.
@@ -19,7 +19,7 @@ printAnnouncements(){
     then
         # Add each line to the announcement
 
-        if [ "$2" == "" ]
+        if [ "$1" == "" ]
         then
             ANNOUNCEMENT=""
             while read -r LINE
@@ -28,7 +28,7 @@ printAnnouncements(){
                 ANNOUNCEMENT+="$LINE\\\n"
             done < "$ANNOUNCEMENT_FILE" 
         else
-            ANNOUNCEMENT="$2"
+            ANNOUNCEMENT="$1"
         fi
 
         # Wait 2 sec to make sure player actually recieves it.
