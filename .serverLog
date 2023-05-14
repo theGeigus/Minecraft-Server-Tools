@@ -1,27 +1,78 @@
 
 NO LOG FILE! - setting up server logging...
-[2023-05-10 21:19:55:411 INFO] Starting Server
-[2023-05-10 21:19:55:411 INFO] Version 1.19.81.01
-[2023-05-10 21:19:55:411 INFO] Session ID 3b45210e-ff0c-4428-88ac-6c3765ca9b03
-[2023-05-10 21:19:55:411 INFO] Build ID 1.19.81
-[2023-05-10 21:19:55:411 INFO] Branch r/19_u8
-[2023-05-10 21:19:55:411 INFO] Commit ID 2606f6a1a1e3ecf907cb776d138dac765c5ba3ff
-[2023-05-10 21:19:55:411 INFO] Configuration Publish
-[2023-05-10 21:19:55:411 INFO] Level Name: NameField
-[2023-05-10 21:19:55:412 INFO] Game mode: 0 Survival
-[2023-05-10 21:19:55:412 INFO] Difficulty: 3 HARD
+[2023-05-13 21:00:53:645 INFO] Starting Server
+[2023-05-13 21:00:53:645 INFO] Version 1.19.81.01
+[2023-05-13 21:00:53:645 INFO] Session ID b28da1c5-96d6-4c60-9cc9-ceca58b5efb9
+[2023-05-13 21:00:53:645 INFO] Build ID 1.19.81
+[2023-05-13 21:00:53:645 INFO] Branch r/19_u8
+[2023-05-13 21:00:53:645 INFO] Commit ID 2606f6a1a1e3ecf907cb776d138dac765c5ba3ff
+[2023-05-13 21:00:53:645 INFO] Configuration Publish
+[2023-05-13 21:00:53:645 INFO] Level Name: NameField
+[2023-05-13 21:00:53:646 INFO] Game mode: 0 Survival
+[2023-05-13 21:00:53:646 INFO] Difficulty: 3 HARD
+[2023-05-13 21:00:53:789 INFO] opening worlds/NameField/db
 gamerule dodaylightcycle false 
 gamerule doweathercycle false 
-[2023-05-10 21:19:56:567 INFO] opening worlds/NameField/db
-[2023-05-10 21:19:56:977 INFO] IPv4 supported, port: 19132: Used for gameplay and LAN discovery
-[2023-05-10 21:19:56:977 INFO] IPv6 supported, port: 19133: Used for gameplay
-[2023-05-10 21:19:56:142 INFO] Server started.
+[2023-05-13 21:00:53:233 INFO] IPv4 supported, port: 19132: Used for gameplay and LAN discovery
+[2023-05-13 21:00:53:233 INFO] IPv6 supported, port: 19133: Used for gameplay
+[2023-05-13 21:00:54:394 INFO] Server started.
+[2023-05-13 21:00:54:394 INFO] ================ TELEMETRY MESSAGE ===================
+[2023-05-13 21:00:54:394 INFO] Server Telemetry is currently not enabled. 
+[2023-05-13 21:00:54:394 INFO] Enabling this telemetry helps us improve the game.
+[2023-05-13 21:00:54:394 INFO] 
+[2023-05-13 21:00:54:394 INFO] To enable this feature, add the line 'emit-server-telemetry=true'
+[2023-05-13 21:00:54:394 INFO] to the server.properties file in the handheld/src-server directory
+[2023-05-13 21:00:54:394 INFO] ======================================================
+Game rule dodaylightcycle has been updated to false
+Game rule doweathercycle has been updated to false
+[2023-05-13 21:01:16:652 INFO] Player connected: Geigus, xuid: 2535405588488938
+Player Connected - Restarting time!
+gamerule dodaylightcycle true 
+gamerule doweathercycle true 
+Game rule dodaylightcycle has been updated to true
+Game rule doweathercycle has been updated to true
+[2023-05-13 21:01:20:066 INFO] Player Spawned: Geigus xuid: 2535405588488938
+tellraw Geigus {"rawtext": [{"text": "§k~~~§rToday's fortune:§k~~~§r\nIf God had intended Man to program, we'd be born with serial \I/O\ ports.\n"}]} 
+* Line 1, Column 23
+  Bad escape sequence in string
+See Line 1, Column 123 for detail.
+
+[2023-05-13 21:04:03:649 INFO] Player disconnected: Geigus, xuid: 2535405588488938
+list 
+There are 0/10 players online:
+
+There are no players currently online - pausing time!
+gamerule dodaylightcycle false 
+gamerule doweathercycle false 
+Game rule dodaylightcycle has been updated to false
+Game rule doweathercycle has been updated to false
+[2023-05-13 21:05:34:335 INFO] Player connected: Geigus, xuid: 2535405588488938
+Player Connected - Restarting time!
+gamerule dodaylightcycle true 
+gamerule doweathercycle true 
+Game rule dodaylightcycle has been updated to true
+Game rule doweathercycle has been updated to true
+[2023-05-13 21:05:39:954 INFO] Player Spawned: Geigus xuid: 2535405588488938
+tellraw Geigus {"rawtext": [{"text": "§k~~~§rToday's fortune:§k~~~§r\nIf God had intended Man to program, we'd be born with serial \I/O\ ports.\n"}]} 
+* Line 1, Column 23
+  Bad escape sequence in string
+See Line 1, Column 123 for detail.
+
+tellraw @a {"rawtext": [{"text": "§k~~~§rToday's fortune:§k~~~§r\nIf God had intended Man to program, we'd be born with serial \"I/O\" ports.\n"}]} 
+tellraw @a {"rawtext": [{"text": "§k~~~§rToday's fortune:§k~~~§r\nIf God had intended Man to program, we'd be born with serial \"I/O\" ports.\n"}]} 
+[2023-05-13 21:08:19:143 INFO] Player disconnected: Geigus, xuid: 2535405588488938
+list 
+There are 0/10 players online:
+
+There are no players currently online - pausing time!
+gamerule dodaylightcycle false 
+gamerule doweathercycle false 
 Game rule dodaylightcycle has been updated to false
 Game rule doweathercycle has been updated to false
 list 
 There are 0/10 players online:
 
 stop 
-[2023-05-10 21:20:05:452 INFO] Server stop requested.
-[2023-05-10 21:20:05:472 INFO] Stopping server...
+[2023-05-13 21:13:04:353 INFO] Server stop requested.
+[2023-05-13 21:13:05:401 INFO] Stopping server...
 Quit correctly

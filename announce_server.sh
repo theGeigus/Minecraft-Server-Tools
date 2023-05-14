@@ -1,5 +1,7 @@
 #! /bin/bash
 
+### TODO: Escape " in announcements ###
+
 source ./server.config
 
 # If no player name is supplied, announce to everyone.
@@ -18,6 +20,7 @@ printAnnouncements(){
         ANNOUNCEMENT=""
         while read -r LINE
         do
+            LINE=$(echo "$LINE" | sed -r 's/"+/\\\\"/g')
             ANNOUNCEMENT+="$LINE\\\n"
         done < $ANNOUNCEMENT_FILE 
 
