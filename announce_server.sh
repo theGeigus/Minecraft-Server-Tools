@@ -40,13 +40,13 @@ printAnnouncements(){
 }
 
     # Cases for Announcement handling, check if enabled
-if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
+if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ] || [ "$2" != "" ]
 then
     touch announcements.txt
     touch .hasSeenAnnouncement
     ANNOUNCEMENT_FILE="announcements.txt"
     # If set to once, check if seen
-    if [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
+    if [ "$2" == "" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
     then 
     
         if ! grep -q -o "$PLAYER_NAME" .hasSeenAnnouncement 
@@ -74,7 +74,7 @@ then
     touch .hasSeenAdminAnnouncement
     ANNOUNCEMENT_FILE=".adminAnnouncements.txt"
     # If set to once, check if seen
-    if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ]
+    if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ] && [ "$2" == "" ]
     then
         if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] 
         then

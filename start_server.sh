@@ -12,7 +12,7 @@ if [ "$DO_FORTUNE" == "YES" ]
 	echo "Generating fortune..."
 
 	echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
-	fortune >> announcements.txt
+	fortune -s >> announcements.txt
 fi
 
 # Check if server is already running

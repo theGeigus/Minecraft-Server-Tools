@@ -2,11 +2,27 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 
+
+
+# Create server.config if it doesn't exist, eventually should ask things like java/bedrock
 if ! [ -f "./server.config" ]
 then
     echo 'File server.config does not exist... Creating config file!'
 
     source .configDefaults.txt
+
+    read -r -p "Would you like to download Minecraft to the current directory? ($(pwd)) [Y/n] " VAL
+
+    if [[ ! "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]] && [ "$VAL" != "" ]
+    then
+        read -r -p "Where should Minecraft be stored? " SOURCE_PATH
+
+        if ! (cd "$SOURCE_PATH")
+        then
+            echo "Invalid location. Check to make sure this directory exists."
+            exit 1
+        fi
+    fi
 
     while read -r LINE
     do
@@ -32,22 +48,31 @@ FILE_LINK="$(curl -A "$AGENT" "$URL" 2> /dev/null | grep -o "https://minecraft.a
 VERSION_NUM=$(echo "$FILE_LINK" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
 
 # Check if version from link matches the current installed version.
-touch minecraft.version
-if [ "$(cat minecraft.version)" == "$VERSION_NUM" ]
+if ! touch "$SOURCE_PATH/minecraft.version" >> /dev/null
+then
+    echo "Cannot write to directory '$(pwd)', check if you have permisson to write there."
+    exit 1
+fi
+
+if [ "$(cat "$SOURCE_PATH/minecraft.version")" == "$VERSION_NUM" ]
 then
     echo "Minecraft is already up to date! Currently on version $(cat minecraft.version)."
     exit 0
 fi
 
 # Download file
-if [ "$(cat minecraft.version)" == "" ]
+if [ "$(cat "$SOURCE_PATH/minecraft.version")" == "" ]
 then
     echo "Downloading newest version of Minecraft (Version: $VERSION_NUM). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
 else
     echo "Update found! Downloading new files for Minecraft version $VERSION_NUM. (Currently on version: $(cat minecraft.version))"
 fi
 
-wget -q --show-progress -O "minecraft-server-files.zip" "$FILE_LINK"
+if ! wget -q --show-progress -O "$SOURCE_PATH/minecraft-server-files.zip" "$FILE_LINK"
+then
+    echo "Failed to download file"
+fi
+
 echo "Finished downloading files"
 
 # Stop server if running, wait 15 minutes if there are players online
@@ -55,28 +80,28 @@ echo "Finished downloading files"
 
 # Copy these files so they are not overwritten by the update
 echo "Making a copy of your server files so the new ones won't overwrite them..."
-mv ./allowlist.json ./allowlist.json.old && echo "• Copied allowlist.json"
-mv ./behavior_packs/ ./behavior_packs.old/ && echo "• Copied behavior_packs/"
-mv ./config/ ./config.old/ && echo "• Copied config/"
-mv ./definitions/ ./definitions.old/ && echo "• Copied definitions/"
-mv ./permissions.json ./permissions.json.old && echo "• Copied permissions.json"
-mv ./resource_packs/ ./resource_packs.old/ && echo "• Copied resource_packs/"
-mv ./server.properties server.properties.old && echo "• Copied server.properties"
+mv "$SOURCE_PATH/allowlist.json" "$SOURCE_PATH/allowlist.json.old" && echo "• Copied allowlist.json"
+mv "$SOURCE_PATH/behavior_packs/" "$SOURCE_PATH/behavior_packs.old/" && echo "• Copied behavior_packs/"
+mv "$SOURCE_PATH/config/" "$SOURCE_PATH/config.old/" && echo "• Copied config/"
+mv "$SOURCE_PATH/definitions/" "$SOURCE_PATH/definitions.old/" && echo "• Copied definitions/"
+mv "$SOURCE_PATH/permissions.json" "$SOURCE_PATH/permissions.json.old" && echo "• Copied permissions.json"
+mv "$SOURCE_PATH/resource_packs/" "$SOURCE_PATH/resource_packs.old/" && echo "• Copied resource_packs/"
+mv "$SOURCE_PATH/server.properties" "$SOURCE_PATH./server.properties.old" && echo "• Copied server.properties"
 
 # Extract new files
 echo "Extracting new server files..."
-unzip -o "minecraft-server-files.zip" > /dev/null && rm "minecraft-server-files.zip"
+unzip -o "$SOURCE_PATH/minecraft-server-files.zip" > /dev/null && rm "$SOURCE_PATH/minecraft-server-files.zip"
 echo "Extraction complete!"
 
 # Restore the old files
 echo "Finally, restoring copies..."
-mv -f ./allowlist.json.old ./allowlist.json && echo "• Restored allowlist.json"
-mv -f ./behavior_packs.old/ ./behavior_packs/ && echo "• Restored behavior_packs/"
-mv -f ./config.old/ ./config/ && echo "• Restored config/"
-mv -f ./definitions.old/ ./definitions/ && echo "• Restored definitions/"
-mv -f ./permissions.json.old ./permissions.json && echo "• Restored permissions.json"
-mv -f ./resource_packs.old/ ./resource_packs/ && echo "• Restored resource_packs/"
-mv -f ./server.properties.old ./server.properties && echo "• Restored server.properties"
+mv -f "$SOURCE_PATH/allowlist.json.old" "$SOURCE_PATH/allowlist.json" && echo "• Restored allowlist.json"
+mv -f "$SOURCE_PATH/behavior_packs.old/" "$SOURCE_PATH/behavior_packs/" && echo "• Restored behavior_packs/"
+mv -f "$SOURCE_PATH/config.old/" "$SOURCE_PATH/config/" && echo "• Restored config/"
+mv -f "$SOURCE_PATH/definitions.old/" "$SOURCE_PATH/definitions/" && echo "• Restored definitions/"
+mv -f "$SOURCE_PATH/permissions.json.old" "$SOURCE_PATH/permissions.json" && echo "• Restored permissions.json"
+mv -f "$SOURCE_PATH/resource_packs.old/" "$SOURCE_PATH/resource_packs/" && echo "• Restored resource_packs/"
+mv -f "$SOURCE_PATH/server.properties.old" "$SOURCE_PATH/server.properties" && echo "• Restored server.properties"
 echo "Done! Your server is now updated to version $VERSION_NUM."
 
 echo "$VERSION_NUM" > minecraft.version
