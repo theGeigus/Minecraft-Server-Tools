@@ -14,15 +14,22 @@ fi
 
 # Announcement system, defined as a function for easy use with cases below.
 printAnnouncements(){
-    if grep -q -P -m 1 "[^s]" $ANNOUNCEMENT_FILE
+
+    if grep -q -P -m 1 "[^s]" "$ANNOUNCEMENT_FILE"
     then
         # Add each line to the announcement
-        ANNOUNCEMENT=""
-        while read -r LINE
-        do
-            LINE=$(echo "$LINE" | sed -r 's/"+/\\\\"/g')
-            ANNOUNCEMENT+="$LINE\\\n"
-        done < $ANNOUNCEMENT_FILE 
+
+        if [ "$2" == "" ]
+        then
+            ANNOUNCEMENT=""
+            while read -r LINE
+            do
+                LINE=$(echo "$LINE" | sed -r 's/"+/\\\\"/g')
+                ANNOUNCEMENT+="$LINE\\\n"
+            done < "$ANNOUNCEMENT_FILE" 
+        else
+            ANNOUNCEMENT="$2"
+        fi
 
         # Wait 2 sec to make sure player actually recieves it.
         sleep 2;

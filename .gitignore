@@ -1,14 +1,13 @@
 #My ignored files
-server.config
-.serverLog
-BedrockDownloadedServerFiles/
 announcements.txt
 adminAnnouncements.txt
 .hasSeenAnnouncement
-.prevAnnouncement
-.hasSeenAdminAnnouncement
-.prevAdminAnnouncement
 minecraft.version
+.hasSeenAdminAnnouncement
+.prevAnnouncement
+.prevAdminAnnouncement
+server.config
+.serverLog
 
 #Minecraft's files
 allowlist.json*
