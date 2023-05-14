@@ -1,6 +1,6 @@
 #My ignored files
 server.config
-serverLog
+.serverLog
 BedrockDownloadedServerFiles/
 announcements.txt
 adminAnnouncements.txt
