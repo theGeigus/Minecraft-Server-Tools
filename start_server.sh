@@ -6,6 +6,15 @@ source ./server.config || exit 1
 
 #--- INITIALIZE SERVER ---
 
+# Generate fortune
+if [ "$DO_FORTUNE" == "YES" ]
+	then
+	echo "Generating fortune..."
+
+	echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
+	fortune >> announcements.txt
+fi
+
 # Check if server is already running
 if [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 then
@@ -39,14 +48,6 @@ fi
 
 # An excessive number of grep uses to pull a single number (>_<)
 PORT=$(grep "IPv4" .serverLog | grep -o -P " port: \d+" | grep -o -P "\d+")
-
-if [ "$DO_FORTUNE" == "YES" ]
-	then
-	echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
-	fortune >> announcements.txt
-fi
-
-
 
 #--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
 
