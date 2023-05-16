@@ -39,16 +39,22 @@ SETUP GUIDE:
 
 
 
-TROUBLESHOOTING:
+FAQ:
 
-Can't run any of the files:
+My files don't run:
 - Mark all downloaded files as executable and try again (On Linux, use 'chmod +x FILENAME' to mark each as executable)
 
-Can not open connection to ports:
-- Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running the following (change port numbers if you are not using the defaults):
+The server starts but I can't connect:
+- Your ports may not be opened. Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running the following (change port numbers if you are not using the defaults):
     firewall-cmd --zone=public --permanent --add-port=19132-19133/tcp 
     firewall-cmd --zone=public --permanent --add-port=19132-19133/udp 
     firewall-cmd --reload
+
+Minecraft's files / Server tools files? Which is which?
+- The server.config file mentions both of these. 'Minecraft's files' refers to the files that are used by Minecraft to run the server (things like 'server.properties' and 'worlds/'). Server tools files refer to the files that came with this program, that start, stop, and monitor your server, that Minecraft does not use (such as 'update_server.sh' and 'start_server.sh').
+
+How do I edit the settings of my world?
+- Your world's settings can be found inside of 'server.properties'. This will allow you to change things such as the seed, difficulty, gamemode, etc.
 
 
 OTHER THINGS:

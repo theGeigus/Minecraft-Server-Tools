@@ -1,8 +1,7 @@
 #!/bin/bash
 
+# Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
-
-
 
 # Create server.config if it doesn't exist, eventually should ask things like java/bedrock
 if ! [ -f "./server.config" ]
@@ -17,9 +16,11 @@ then
     then
         read -r -p "Where should Minecraft be stored? " SOURCE_PATH
 
+        SOURCE_PATH=$(eval echo "$SOURCE_PATH")
+
         if ! (cd "$SOURCE_PATH")
         then
-            echo "Invalid location. Check to make sure this directory exists."
+            echo "Invalid location. Check to make sure this directory ($SOURCE_PATH) exists and that you have access to it."
             exit 1
         fi
     fi
@@ -48,24 +49,24 @@ FILE_LINK="$(curl -A "$AGENT" "$URL" 2> /dev/null | grep -o "https://minecraft.a
 VERSION_NUM=$(echo "$FILE_LINK" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
 
 # Check if version from link matches the current installed version.
-if ! touch "$SOURCE_PATH/minecraft.version" >> /dev/null
+if ! touch "$SOURCE_PATH/minecraft_version.txt" >> /dev/null
 then
     echo "Cannot write to directory '$(pwd)', check if you have permisson to write there."
     exit 1
 fi
 
-if [ "$(cat "$SOURCE_PATH/minecraft.version")" == "$VERSION_NUM" ]
+if [ "$(cat "$SOURCE_PATH/minecraft_version.txt")" == "$VERSION_NUM" ]
 then
-    echo "Minecraft is already up to date! Currently on version $(cat minecraft.version)."
+    echo "Minecraft is already up to date! Currently on version $(cat minecraft_version.txt)."
     exit 0
 fi
 
 # Download file
-if [ "$(cat "$SOURCE_PATH/minecraft.version")" == "" ]
+if [ "$(cat "$SOURCE_PATH/minecraft_version.txt")" == "" ]
 then
     echo "Downloading newest version of Minecraft (Version: $VERSION_NUM). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
 else
-    echo "Update found! Downloading new files for Minecraft version $VERSION_NUM. (Currently on version: $(cat minecraft.version))"
+    echo "Update found! Downloading new files for Minecraft version $VERSION_NUM. (Currently on version: $(cat minecraft_version.txt))"
 fi
 
 if ! wget -q --show-progress -O "$SOURCE_PATH/minecraft-server-files.zip" "$FILE_LINK"
@@ -90,10 +91,11 @@ mv "$SOURCE_PATH/server.properties" "$SOURCE_PATH./server.properties.old" && ech
 
 # Extract new files
 echo "Extracting new server files..."
-unzip -o "$SOURCE_PATH/minecraft-server-files.zip" > /dev/null && rm "$SOURCE_PATH/minecraft-server-files.zip"
+(cd "$SOURCE_PATH" && unzip -o "$SOURCE_PATH/minecraft-server-files.zip" > /dev/null && rm "$SOURCE_PATH/minecraft-server-files.zip")
 echo "Extraction complete!"
 
 # Restore the old files
+### TODO: Check how these mergre/replace (e.g. not put folders inside folders)
 echo "Finally, restoring copies..."
 mv -f "$SOURCE_PATH/allowlist.json.old" "$SOURCE_PATH/allowlist.json" && echo "• Restored allowlist.json"
 mv -f "$SOURCE_PATH/behavior_packs.old/" "$SOURCE_PATH/behavior_packs/" && echo "• Restored behavior_packs/"
@@ -104,7 +106,7 @@ mv -f "$SOURCE_PATH/resource_packs.old/" "$SOURCE_PATH/resource_packs/" && echo 
 mv -f "$SOURCE_PATH/server.properties.old" "$SOURCE_PATH/server.properties" && echo "• Restored server.properties"
 echo "Done! Your server is now updated to version $VERSION_NUM."
 
-echo "$VERSION_NUM" > minecraft.version
+echo "$VERSION_NUM" > minecraft_version.txt
 
 # Restart server
 ./start_server.sh

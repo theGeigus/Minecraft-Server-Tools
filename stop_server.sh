@@ -2,7 +2,13 @@
 
 # Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" ||  echo "Something broke, could not find directory?"
-source ./server.config || exit 1
+
+# Check for config
+if ! source server.config
+then
+    echo "File 'server.config' not found. Run please run 'update_server.sh' and try again."
+    exit 1
+fi
 
 #--- STOP SERVER ---
 stopServer(){
@@ -91,11 +97,13 @@ stopServer(){
 printHelp(){
 	echo "-h: Show this page and exit"
 	echo "-t NUMBER: set delay to stop the server, given in minutes. Ignored if there are no players are online."
+	echo "-r MESSAGE: shows reason for shutdown when kicking players, as well as during the countdown to shutdown."
 }
 
 TIME=-1
 # Check for arguments, if any. Only takes -t as of now
-while getopts 'ht:' OPTION; do
+while getopts 'ht:r:' OPTION
+do
 	case "$OPTION" in
 		h)
 			printHelp

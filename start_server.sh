@@ -2,9 +2,15 @@
 
 # Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
-source ./server.config || exit 1
 
-#--- INITIALIZE SERVER ---
+# Check for config
+if ! source server.config
+then
+    echo "File 'server.config' not found. Run please run 'update_server.sh' and try again."
+    exit 1
+fi
+
+### INITIALIZE SERVER ###
 
 # Generate fortune
 if [ "$DO_FORTUNE" == "YES" ]
@@ -22,12 +28,16 @@ then
 	exit 0
 fi
 
+echo "Starting server..."
+
 # Clear previous log file and link it to the screen
 echo "" > .serverLog
 screen -dmS "$SERVER_NAME" -L -Logfile .serverLog bash -c "LD_LIBRARY_PATH=${SOURCE_PATH}/ ${SOURCE_PATH}/bedrock_server"
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
-echo "Server is now starting!"
+# Error reporting for wrong directory, we'll let it keep running for now as next step should terminate it anyway.
+grep -q "No such file or directory" .serverLog &&
+	echo "ERROR: Could not find Minecraft's server files. Check your path in 'server.config' or run 'update_server.sh' and try again."
 
 # Check if server is running, exit if not.
 CHECK=$(screen -ls | grep -o "$SERVER_NAME")
@@ -80,7 +90,7 @@ do
 		do
 			if [ "$(tail -3 .serverLog | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
 			then
-				./announce_server.sh "$PLAYER_NAME"
+				./announce_server.sh -p "$PLAYER_NAME"
 				break
 			else
 				inotifywait -qq -e MODIFY .serverLog

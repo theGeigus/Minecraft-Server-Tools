@@ -2,7 +2,7 @@
 announcements.txt
 adminAnnouncements.txt
 .hasSeenAnnouncement
-minecraft.version
+minecraft_version.txt
 .hasSeenAdminAnnouncement
 .prevAnnouncement
 .prevAdminAnnouncement
@@ -14,6 +14,7 @@ allowlist.json*
 server.properties*
 permissions.json*
 behavior_packs/
+bedrock_server_how_to.html
 config/
 definitions/
 development_behavior_packs/

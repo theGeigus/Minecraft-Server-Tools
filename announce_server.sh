@@ -1,15 +1,47 @@
 #! /bin/bash
 
-### TODO: Escape " in announcements ###
+# Change directory and import variables
+cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 
-source ./server.config
+# Check for config
+if ! source server.config
+then
+    echo "File 'server.config' not found. Run please run 'update_server.sh' and try again."
+    exit 1
+fi
+
+printHelp(){
+	echo "-h: Show this page and exit"
+	echo "-a MESSAGE: prints given message as an announcement"
+    echo "-p PLAYER: Send announcement to only the given player"
+}
+
+# Check for arguments
+while getopts 'ha:p:' OPTION
+do
+	case "$OPTION" in
+		h)
+			printHelp
+			exit 0
+			;;
+		a)
+			ANNOUNCEMENT="$OPTARG"
+			;;
+        p)
+            PLAYER_NAME="$OPTARG"
+            ;;
+    	?)
+			echo "Valid options are:"
+			printHelp
+			exit 1
+      		;;
+	esac
+done
 
 # If no player name is supplied, announce to everyone.
-if [ "$2" == "" ]
+if [ "$PLAYER_NAME" == "" ]
 then
     PLAYER_NAME="@a"
-else
-    PLAYER_NAME="$2"
 fi
 
 # Announcement system, defined as a function for easy use with cases below.
@@ -19,16 +51,16 @@ printAnnouncements(){
     then
         # Add each line to the announcement
 
-        if [ "$1" == "" ]
+        if [ "$ANNOUNCEMENT" == "" ]
         then
-            ANNOUNCEMENT=""
             while read -r LINE
             do
-                LINE=$(echo "$LINE" | sed -r 's/"+/\\\\"/g')
+                LINE=$(echo "$LINE" | sed -r 's/"+/\\\\"/g') # Escape any double quotes
                 ANNOUNCEMENT+="$LINE\\\n"
             done < "$ANNOUNCEMENT_FILE" 
         else
-            ANNOUNCEMENT="$1"
+            ANNOUNCEMENT=$(echo "$ANNOUNCEMENT" | sed -r 's/"+/\\\\"/g') 
+            ANNOUNCEMENT=$(echo "$ANNOUNCEMENT" | sed -r 's/\\+/\\\\/g') # Add extra backslashes any time the user uses one
         fi
 
         # Wait 2 sec to make sure player actually recieves it.
@@ -40,13 +72,13 @@ printAnnouncements(){
 }
 
     # Cases for Announcement handling, check if enabled
-if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ] || [ "$2" != "" ]
+if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ] || [ "$PLAYER_NAME" != "" ]
 then
     touch announcements.txt
     touch .hasSeenAnnouncement
     ANNOUNCEMENT_FILE="announcements.txt"
     # If set to once, check if seen
-    if [ "$2" == "" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
+    if [ "$PLAYER_NAME" == "" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
     then 
     
         if ! grep -q -o "$PLAYER_NAME" .hasSeenAnnouncement 
@@ -67,14 +99,14 @@ then
     fi
 fi
 
-# Cases for admin announcement handleing
+# Cases for admin announcement handling
 if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
 then
     touch .adminAnnouncements.txt
     touch .hasSeenAdminAnnouncement
     ANNOUNCEMENT_FILE=".adminAnnouncements.txt"
     # If set to once, check if seen
-    if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ] && [ "$2" == "" ]
+    if [ "$(echo "$ADMIN_LIST" | grep -o "$PLAYER_NAME")" == "$PLAYER_NAME" ] #
     then
         if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] 
         then
