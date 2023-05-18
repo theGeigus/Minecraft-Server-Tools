@@ -1,5 +1,5 @@
 SERVER_NAME='minecraft-server'
-SOURCE_PATH='$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )'
+SERVER_PATH='$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )'
 NO_PLAYER_ACTION='PAUSE'
 DO_ANNOUNCEMENTS='YES'
 DO_ADMIN_ANNOUNCEMENTS='ONCE'

@@ -2,6 +2,7 @@
 
 # Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
+TOOLS_PATH=$(pwd)
 
 # Check for config
 if ! source server.config
@@ -21,6 +22,8 @@ if [ "$DO_FORTUNE" == "YES" ]
 	fortune -s >> announcements.txt
 fi
 
+cd "$SERVER_PATH" || echo "Something broke, could not find directory?"
+
 # Check if server is already running
 if [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 then
@@ -31,12 +34,12 @@ fi
 echo "Starting server..."
 
 # Clear previous log file and link it to the screen
-echo "" > .serverLog
-screen -dmS "$SERVER_NAME" -L -Logfile .serverLog bash -c "LD_LIBRARY_PATH=${SOURCE_PATH}/ ${SOURCE_PATH}/bedrock_server"
+echo "" > "$TOOLS_PATH/.serverLog"
+screen -dmS "$SERVER_NAME" -L -Logfile "$TOOLS_PATH/.serverLog" bash -c "LD_LIBRARY_PATH=${SERVER_PATH}/ ${SERVER_PATH}/bedrock_server"
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
 # Error reporting for wrong directory, we'll let it keep running for now as next step should terminate it anyway.
-grep -q "No such file or directory" .serverLog &&
+grep -q "No such file or directory" "$TOOLS_PATH/.serverLog" &&
 	echo "ERROR: Could not find Minecraft's server files. Check your path in 'server.config' or run 'update_server.sh' and try again."
 
 # Check if server is running, exit if not.
@@ -49,6 +52,7 @@ else
 	echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 fi
 
+
 # Set day and weather cycle to false until a player joins
 if [ "${NO_PLAYER_ACTION^^}" == "PAUSE" ]
 then
@@ -57,7 +61,7 @@ then
 fi
 
 # An excessive number of grep uses to pull a single number (>_<)
-PORT=$(grep "IPv4" .serverLog | grep -o -P " port: \d+" | grep -o -P "\d+")
+PORT=$(grep "IPv4" "$TOOLS_PATH/.serverLog" | grep -o -P " port: \d+" | grep -o -P "\d+")
 
 #--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
 
@@ -65,14 +69,14 @@ PORT=$(grep "IPv4" .serverLog | grep -o -P " port: \d+" | grep -o -P "\d+")
 while [ "$(screen -ls | grep  -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 do
 	# Wait for log update, if player connects set day and weather cycle to true
-	inotifywait -qq -e MODIFY .serverLog
-	if [ "$(tail -3 .serverLog | grep -o 'Player connected:')" == 'Player connected:' ]
+	inotifywait -qq -e MODIFY "$TOOLS_PATH/.serverLog"
+	if [ "$(tail -3 "$TOOLS_PATH/.serverLog" | grep -o 'Player connected:')" == 'Player connected:' ]
 	then
 
 		# I think I'm making this more complicated than it needs to be... Oh well
-		PLAYER_NAME=$(tail -3 .serverLog | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 3, length($0)-8) }')
+		PLAYER_NAME=$(tail -3 "$TOOLS_PATH/.serverLog" | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 3, length($0)-8) }')
 
-		echo "Player Connected - Restarting time!" >> .serverLog
+		echo "Player Connected - Restarting time!" >> "$TOOLS_PATH/.serverLog"
 
 		# Set day and weather cycle to false if set to pause mode
 		if [ "$NO_PLAYER_ACTION" == "PAUSE" ]
@@ -88,12 +92,12 @@ do
 		COUNT=0
 		( while [ $COUNT -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
 		do
-			if [ "$(tail -3 .serverLog | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
+			if [ "$(tail -3 "$TOOLS_PATH/.serverLog" | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
 			then
-				./announce_server.sh -p "$PLAYER_NAME"
+				"$TOOLS_PATH/announce_server.sh" -p "$PLAYER_NAME"
 				break
 			else
-				inotifywait -qq -e MODIFY .serverLog
+				inotifywait -qq -e MODIFY "$TOOLS_PATH/.serverLog"
 				((COUNT+=1))
 			fi
 		done
@@ -101,17 +105,17 @@ do
 
 	else
 		# If player disconnects, check for remaining players
-		if [ "$(tail -3 .serverLog | grep -o 'Player disconnected:')" == "Player disconnected:" ]
+		if [ "$(tail -3 "$TOOLS_PATH/.serverLog" | grep -o 'Player disconnected:')" == "Player disconnected:" ]
 		then
 
 			screen -Rd "$SERVER_NAME" -X stuff "list \r"
 
 			# Wait for file update, if no players are online set day and weather cycle to be false
-			inotifywait -qq -e MODIFY .serverLog > /dev/null
-			if [ "$(tail -3 .serverLog | grep -o 'There are 0')" == "There are 0" ]
+			inotifywait -qq -e MODIFY "$TOOLS_PATH/.serverLog" > /dev/null
+			if [ "$(tail -3 "$TOOLS_PATH/.serverLog" | grep -o 'There are 0')" == "There are 0" ]
 			then
 
-				echo "There are no players currently online - pausing time!" >> .serverLog
+				echo "There are no players currently online - pausing time!" >> "$TOOLS_PATH/.serverLog"
 
 				if [ "$NO_PLAYER_ACTION" == "PAUSE" ]
 				then

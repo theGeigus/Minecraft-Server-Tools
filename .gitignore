@@ -1,6 +1,6 @@
 #My ignored files
 announcements.txt
-adminAnnouncements.txt
+.adminAnnouncements.txt
 .hasSeenAnnouncement
 minecraft_version.txt
 .hasSeenAdminAnnouncement
@@ -8,26 +8,3 @@ minecraft_version.txt
 .prevAdminAnnouncement
 server.config
 .serverLog
-
-#Minecraft's files
-allowlist.json*
-server.properties*
-permissions.json*
-behavior_packs/
-bedrock_server_how_to.html
-config/
-definitions/
-development_behavior_packs/
-development_resource_packs/
-development_skin_packs/
-minecraftpe/
-premium_cache/
-resource_packs/
-treatments/
-world_templates/
-worlds/
-bedrock_server
-bedrock_server_symbols.debug
-Dedicated_Server.txt
-release-notes.txt
-valid_known_packs.json
