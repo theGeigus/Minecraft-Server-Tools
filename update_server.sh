@@ -120,7 +120,7 @@ mv "$SERVER_PATH/config/" "$SERVER_PATH/config.old/" && echo "• Copied config/
 mv "$SERVER_PATH/definitions/" "$SERVER_PATH/definitions.old/" && echo "• Copied definitions/"
 mv "$SERVER_PATH/permissions.json" "$SERVER_PATH/permissions.json.old" && echo "• Copied permissions.json"
 mv "$SERVER_PATH/resource_packs/" "$SERVER_PATH/resource_packs.old/" && echo "• Copied resource_packs/"
-mv "$SERVER_PATH/server.properties" "$SERVER_PATH./server.properties.old" && echo "• Copied server.properties"
+mv "$SERVER_PATH/server.properties" "$SERVER_PATH/server.properties.old" && echo "• Copied server.properties"
 
 # Extract new files
 echo "Extracting new server files..."

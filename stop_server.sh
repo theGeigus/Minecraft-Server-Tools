@@ -18,9 +18,9 @@ stopServer(){
 	if [ "$CHECK" == "$SERVER_NAME" ]
 	then
 		screen -Rd "$SERVER_NAME" -X stuff "list \r"
-		inotifywait -qq -e MODIFY .serverLog > /dev/null
+		inotifywait -qq -e MODIFY .server.log > /dev/null
 		# Check if any players are currently online, or if TIME is set
-		if [ "$TIME" != 0 ] && [ "$(tail -3 .serverLog | grep -o 'There are 0')" != "There are 0" ]
+		if [ "$TIME" != 0 ] && [ "$(tail -3 .server.log | grep -o 'There are 0')" != "There are 0" ]
 		then
 			# If time is set, send warning message - TODO: eventually add time intervals for messaging
 			if [ "$TIME" -ge 0 ]

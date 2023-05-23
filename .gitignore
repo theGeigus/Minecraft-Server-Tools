@@ -7,4 +7,4 @@ minecraft_version.txt
 .prevAnnouncement
 .prevAdminAnnouncement
 server.config
-.serverLog
+.server.log
