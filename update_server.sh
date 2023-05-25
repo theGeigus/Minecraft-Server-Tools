@@ -5,21 +5,21 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find dir
 
 printHelp(){
 	echo "-h: Show this page and exit"
-	echo "-s: Autostart the sever whenever this exits sucessfully"
+    echo "-c: Check if update is avalible, but do not update"
 }
 
-AUTOSTART=false
+CHECKUPDATE=false
 # Handle flags
-while getopts 'hs' OPTION
+while getopts 'hsc' OPTION
 do
 	case "$OPTION" in
 		h)
 			printHelp
 			exit 0
 			;;
-		s)
-			AUTOSTART=true
-			;;
+        c)
+            CHECKUPDATE=true
+            ;;  
     	?)
 			echo "Unknown option, '$OPTION'" >&2
 			echo "Valid options are:"
@@ -77,7 +77,7 @@ VERSION_NUM=$(echo "$FILE_LINK" | grep -o "bedrock-server-.*.zip" | awk '{ print
 # Check if version from link matches the current installed version.
 if ! touch "$SERVER_PATH/minecraft_version.txt" >> /dev/null
 then
-    echo "Cannot write to directory '$(pwd)', check if you have permisson to write there."
+    echo "Cannot write to directory '$SERVER_PATH', check if you have permisson to write there."
     exit 1
 fi
 
@@ -85,18 +85,24 @@ if [ "$(cat "$SERVER_PATH/minecraft_version.txt")" == "$VERSION_NUM" ]
 then
     echo "Minecraft is already up to date! Currently on version $(cat "$SERVER_PATH/minecraft_version.txt")."
 
-    # Start sever ### TODO: Add check here for if the server is already running
-    $AUTOSTART || read -r -p "Would you like to start the sever now? ($(pwd)) [Y/n] " VAL
-    if [[ "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]] || [ "$VAL" == "" ] || $AUTOSTART
-    then
-        ./start_server.sh || exit 1
-    fi
     exit 0
+else
+    if $CHECKUPDATE
+    then
+        echo "There is an update avalible for your server. Minecraft version $VERSION_NUM is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))"
+
+        [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] && 
+            echo "There is an update avalible for your server. Minecraft version $VERSION_NUM is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
+
+        exit 0
+    fi
+        
 fi
 
 # Download file
 if [ "$(cat "$SERVER_PATH/minecraft_version.txt")" == "" ]
 then
+    echo "new install" > "$SERVER_PATH/minecraft_version.txt" # For message printed later
     echo "Downloading newest version of Minecraft (Version: $VERSION_NUM). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
 else
     echo "Update found! Downloading new files for Minecraft version $VERSION_NUM. (Currently on version: $(cat "$SERVER_PATH/minecraft_version.txt"))"
@@ -139,11 +145,7 @@ mv -f "$SERVER_PATH/resource_packs.old/" "$SERVER_PATH/resource_packs/" && echo 
 mv -f "$SERVER_PATH/server.properties.old" "$SERVER_PATH/server.properties" && echo "• Restored server.properties"
 echo "Done! Your server is now updated to version $VERSION_NUM."
 
-echo "$VERSION_NUM" > "$SERVER_PATH/minecraft_version.txt"
+[ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
+    echo "Minecraft was updated to version $VERSION_NUM. (From $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
 
-# Restart server
-$AUTOSTART || read -r -p "Would you like to start the sever now? ($(pwd)) [Y/n] " VAL
-if [[ "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]] || [ "$VAL" == "" ] || $AUTOSTART
-then
-    ./start_server.sh || exit 1
-fi
+echo "$VERSION_NUM" > "$SERVER_PATH/minecraft_version.txt"

@@ -32,17 +32,22 @@ This makes use of the following programs that may need to be installed seperatel
 SETUP GUIDE:
 
 1. Clone the repo or download and extract the zip.
-2. Run update_server.sh to install Minecraft.
-3. Set your server data in server.properties, such as name, port, difficulty, etc.
+2. Run update_server.sh to install Minecraft. (If you do not need to set world/config settings, you can ignore this and skip to step 4)
+3. Set your server data in 'server.properties' (in Minecraft's directory, if set seperately), such as name, port, difficulty, etc, and set the actions for your server in 'server.config' (always in this directory, created after updating).
 4. Run ./start_server.sh to start your server, the first run of your server should automatically create your world files.
 5. From this point you should be able to leave your server running, but if you need to shut it down for any reason, run ./stop_server.sh
+
+EXTRA: To have your sever auto-start, auto-update, automatically backup, etc, create a cronjob ($ crontab -e) or similar to run start_server.sh daily. This can be done with cron by adding the following line:
+    @daily /PATH/TO/start_server.sh
+
+    To get in-game messages when your server updates, or has an update, you should add your username to ADMIN_LIST in server.config
 
 
 
 FAQ:
 
 My files don't run:
-- Mark all downloaded files as executable and try again (On Linux, use 'chmod +x FILENAME' to mark each as executable)
+- Mark all downloaded files as executable and try again (use 'chmod +x FILENAME' to mark each as executable)
 
 The server starts but I can't connect:
 - Your ports may not be opened. Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running the following (change port numbers if you are not using the defaults):
@@ -51,7 +56,7 @@ The server starts but I can't connect:
     firewall-cmd --reload
 
 Minecraft's files / Server tools files? Which is which?
-- The server.config file mentions both of these. 'Minecraft's files' refers to the files that are used by Minecraft to run the server (things like 'server.properties' and 'worlds/'). Server tools files refer to the files that came with this program, that start, stop, and monitor your server, that Minecraft does not use (such as 'update_server.sh' and 'start_server.sh').
+- 'Minecraft's files' refers to the files that are used by Minecraft to run the server (things like 'server.properties' and 'worlds/'). Server tools files refer to the files that came with this program, that start, stop, and monitor your server, that Minecraft does not use (such as 'update_server.sh' and 'start_server.sh').
 
 How do I edit the settings of my world?
 - Your world's settings can be found inside of 'server.properties'. This will allow you to change things such as the seed, difficulty, gamemode, etc.
@@ -60,5 +65,4 @@ How do I edit the settings of my world?
 OTHER THINGS:
 
 Announcements can be sent through the command line instead of through a file if desired, the syntax for this is:
-    ./announce_server.sh $ANNOUNCEMENT $PLAYER_NAME
-$PLAYER_NAME is not required, will send to all players if not specified
+    ./announce_server.sh -a $ANNOUNCEMENT -p $PLAYER_NAME

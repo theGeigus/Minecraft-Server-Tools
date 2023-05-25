@@ -4,15 +4,17 @@
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 TOOLS_PATH=$(pwd)
 
-# Check for config
-if ! source server.config
-then
-    echo "File 'server.config' not found. Run please run 'update_server.sh' and try again."
-    exit 1
-fi
-
 ### INITIALIZE SERVER ###
 
+# Check for server update
+if ! source server.config 2> /dev/null || [ "$AUTO_UPDATE" == 'YES' ]
+then
+	./update_server.sh
+else
+	./update_server.sh -c
+fi
+
+# Backup world(s)
 if [ "${WORLD_BACKUP^^}" == "YES" ]
 then
 	./backup_server.sh -a

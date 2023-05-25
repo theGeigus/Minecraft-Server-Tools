@@ -1,7 +1,7 @@
 # This file contains the configuration for all server script files (e.g. *_server.sh).
 # To reset all values to default, delete server.config and run ./update_server.sh again
 # Allows all variables to be set in one convienient location instead of within each file.
-# Any blank or incorrect option will dbe interpreted as 'NO' (if applicable)
+# Any blank or incorrect option will be interpreted as 'NO' (if applicable)
 
 ### SERVER NEEDS TO BE RESTARTED TO APPLY CHANGES ###
 
@@ -19,13 +19,11 @@ NO_PLAYER_ACTION=\"$NO_PLAYER_ACTION\"
 DO_ANNOUNCEMENTS=\"$DO_ANNOUNCEMENTS\"
 
 # Show admin announcements. Sends info such as server updates to admins (specified below). Options are 'YES', 'NO', and 'ONCE' (Default is 'ONCE').
+# Currently this just sends a message if the sever version was updated, or if an update is avalible, may do more in the future.
 DO_ADMIN_ANNOUNCEMENTS=\"$DO_ADMIN_ANNOUNCEMENTS\"
 
 # List all players that will recieve admin announcements. Player names should be seperated by spaces.
 ADMIN_LIST=\"$ADMIN_LIST\"
-
-
-### The following lines are planned, but are not yet functional ###
 
 # Enable daily automatic world backups
 WORLD_BACKUP=\"$WORLD_BACKUP\"
@@ -34,7 +32,10 @@ WORLD_BACKUP=\"$WORLD_BACKUP\"
 BACKUP_PATH=\"$BACKUP_PATH\"
 
 # Number of daily backups to keep
-BACKUP_NUM=$BACKUP_NUM
+BACKUP_NUM=\"$BACKUP_NUM\"
+
+# Auto-update server on each startup if avalible. If set to 'NO', a check for an update will still be made. Options are 'YES' or 'NO' (Default is 'YES')
+AUTO_UPDATE=$AUTO_UPDATE
 
 ### Other fun things!
 
