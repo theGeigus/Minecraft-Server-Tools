@@ -19,11 +19,8 @@ printHelp(){
 	echo "-a: Auto backup mode, will run backup and name automatically, however backups will be deleted when max is reached.    	"
 }
 
+GETOPTIONS=true
 AUTOBACKUP=false
-LIST=false
-BACKUP=""
-RESTORE=""
-DELETE=""
 # Check for arguments, if any. Only takes -t as of now
 while getopts 'halb:d:r:' OPTION
 do
@@ -34,18 +31,23 @@ do
 			;;
 		a)
             AUTOBACKUP=true
+			GETOPTIONS=false
 			;;
 		l)
 			LIST=true
+			GETOPTIONS=false
 			;;
 		b)
 			BACKUP=$OPTARG
+			GETOPTIONS=false
 			;;
         r)
             RESTORE=$OPTARG
+			GETOPTIONS=false
             ;;
 		d)
 			DELETE=$OPTARG
+			GETOPTIONS=false
 			;;
     	?)
 			echo "Unknown option, '$OPTION'"
@@ -59,30 +61,6 @@ done
 ### World Backup ###
 
 BACKUP_PATH="$(eval echo "$BACKUP_PATH")"
-
-# List
-listBackups(){
-
-	while read -r LINE
-	do
-		LIST_BACKUPS+=("$LINE")
-	done <<< "$(ls "$BACKUP_PATH")"
-
-	echo "List of backups:"
-
-	COUNT="${#LIST_BACKUPS[@]}"
-	i=0
-	while [ $i -lt "$COUNT" ]
-	do
-		echo "$((i+1)). ${LIST_BACKUPS[$i]}"
-		((i++))
-	done
-}
-if $LIST
-then
-	listBackups
-	exit 0
-fi
 
 # Autobackup
 if $AUTOBACKUP
@@ -112,20 +90,48 @@ fi
 
 echo "Backup directory: $BACKUP_PATH."
 
+# List backups
+listBackups(){
+	unset LIST_BACKUPS
+	while read -r LINE
+	do
+		LIST_BACKUPS+=("$LINE")
+	done <<< "$(ls "$BACKUP_PATH")"
+
+	echo "List of backups:"
+
+	COUNT="${#LIST_BACKUPS[@]}"
+	i=0
+	while [ $i -lt "$COUNT" ]
+	do
+		echo "$((i+1)). ${LIST_BACKUPS[$i]}"
+		((i++))
+	done
+}
+
 # Get options if none set
-if [ "$DELETE" == "" ] && [ "$BACKUP" == "" ] && [ "$RESTORE" == "" ]
-then
+
+getOptions(){
+	LIST=false
+	BACKUP=""
+	RESTORE=""
+	DELETE=""
+
 	echo "Select an option:"
 	printf "\t1. Backup worlds.\n"
 	printf "\t2. Restore backup.\n"
 	printf "\t3. Delete backup.\n"
+	printf "\t4. List backups.\n"
+	printf "\t0. Exit.\n"
 	read -r -p "Enter number here: " VAL
 
-	if [ "$VAL" -lt 1 ] || [ "$VAL" -gt 3 ]
+	if [ "$VAL" -lt 0 ] || [ "$VAL" -gt 4 ]
 	then
 		echo "Invalid option"
 		exit 1
 	fi
+
+	[ "$VAL" == 0 ] && exit 0
 
 	listBackups
 
@@ -172,7 +178,21 @@ then
 		fi
 
 	fi
+}
+
+if $GETOPTIONS
+then
+	getOptions
 fi
+
+# List
+if $LIST
+then
+	listBackups
+fi
+
+while true #Loop indefinately until exited
+do
 
 # Delete backups
 if [ "$DELETE" != "" ]
@@ -205,3 +225,9 @@ then
 
 	cp -r "${BACKUP_PATH:?}/$RESTORE" "$SERVER_PATH/worlds" && echo "Restored '$RESTORE'"
 fi
+
+$GETOPTIONS || exit 0
+
+# Get options again
+getOptions
+done

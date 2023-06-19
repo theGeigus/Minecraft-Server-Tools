@@ -55,10 +55,21 @@ if [ "$CHECK" != "$SERVER_NAME" ]
 then
 	echo "Server failed to start!"
 	exit 1
-else
-	echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 fi
 
+# Wait for IPv4 address to be avalible
+i=0
+while [[ i -lt 5 ]]
+do
+	grep "IPv4" "$TOOLS_PATH/.server.log" && break
+	inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log"
+	((i++))
+done
+
+# An excessive number of grep uses to pull a single number (>_<)
+PORT=$(grep -q -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+
+echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 
 # Set day and weather cycle to false until a player joins
 if [ "${NO_PLAYER_ACTION^^}" == "PAUSE" ]
@@ -66,9 +77,6 @@ then
 	screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle false \r"
 	screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle false \r"
 fi
-
-# An excessive number of grep uses to pull a single number (>_<)
-PORT=$(grep "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
 
 #--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
 

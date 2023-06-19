@@ -77,8 +77,11 @@ stopServer(){
 		if [ "$CHECK" == "$SERVER_NAME" ]
 		then
 			echo "One more try - Attempting to terminate screen..."
-			screen -Rd "$SERVER_NAME" -X stuff "^C" > /dev/null
+			screen -Rd "$SERVER_NAME" -X stuff "^C \r" # > /dev/null
 
+			sleep 2
+
+			CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 			if [ "$CHECK" == "$SERVER_NAME" ]
 				then
 						echo "Server failed to shutdown."
