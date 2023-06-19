@@ -61,13 +61,13 @@ fi
 i=0
 while [[ i -lt 5 ]]
 do
-	grep "IPv4" "$TOOLS_PATH/.server.log" && break
+	grep -q "IPv4" "$TOOLS_PATH/.server.log" && break
 	inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log"
 	((i++))
 done
 
 # An excessive number of grep uses to pull a single number (>_<)
-PORT=$(grep -q -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+PORT=$(grep -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
 
 echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 
