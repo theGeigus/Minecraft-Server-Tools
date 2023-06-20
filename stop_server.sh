@@ -25,7 +25,7 @@ stopServer(){
 			# If time is set, send warning message - TODO: eventually add time intervals for messaging
 			if [ "$TIME" -ge 0 ]
 			then
-				# Yes, had to fix grammar even for something as trivial as this...
+				# Yes, because grammar.
 				if [ "$TIME" == 1 ]
 				then
 					MINUTE="minute"
@@ -36,7 +36,7 @@ stopServer(){
 				echo "There are currently players online. Delaying server shutdown by $TIME $MINUTE."
 
 				### TODO: This should eventually support custom messages as well (such as when updating).
-				screen -Rd "$SERVER_NAME" -X stuff "tellraw @a {\"rawtext\": [{\"text\": \"The server is scheduled for shutdown in $TIME $MINUTE!\"}]} \r" 
+				announce_server.sh -a "The server is scheduled for shutdown in $TIME $MINUTE!" 
 				sleep $((TIME*60))
 			else
 			read -r -p "There are players still online. Are you sure you want to shut down now? [y/N] " VAL
@@ -48,6 +48,12 @@ stopServer(){
 			fi
 
 			fi
+		fi
+
+		# Backup world(s) if someone has been online (used when start server is run automatically each day, otherwise this should never succeed)
+		if [ "${WORLD_BACKUP^^}" == "YES" ]
+		then
+			grep -q "[^[:space:]]" .playedToday 2> /dev/null && ./backup_server.sh -a
 		fi
 		
 		echo "Shutting down server!"
@@ -68,7 +74,7 @@ stopServer(){
 		echo "Server failed to shutdown - Attempting to close screen..."
 
 		# Tell screen to quit
-		screen -Rd "$SERVER_NAME" -X stuff "^A :quit \r" > /dev/null
+		screen -Rd "$SERVER_NAME" -X stuff "^A\r:quit\r"
 
 		sleep 2
 
@@ -77,7 +83,7 @@ stopServer(){
 		if [ "$CHECK" == "$SERVER_NAME" ]
 		then
 			echo "One more try - Attempting to terminate screen..."
-			screen -Rd "$SERVER_NAME" -X stuff "^C \r" # > /dev/null
+			screen -Rd "$SERVER_NAME" -X stuff "^C\r"
 
 			sleep 2
 
@@ -108,25 +114,25 @@ TIME=-1
 while getopts 'ht:r:' OPTION
 do
 	case "$OPTION" in
-		h)
-			printHelp
-			exit 0
-			;;
-		t)
-			if [ "$OPTARG" -ge 0 ]
-			then
-				TIME=$OPTARG
-			else
-				echo "Given time must be 0 or greater (in minutes)"
-				exit 1
-			fi
-			;;
-    	?)
-			echo "Unknown option, '$OPTION'" >&2
-			echo "Valid options are:"
-			printHelp
+	h)
+		printHelp
+		exit 0
+		;;
+	t)
+		if [ "$OPTARG" -ge 0 ]
+		then
+			TIME=$OPTARG
+		else
+			echo "Given time must be 0 or greater (in minutes)"
 			exit 1
-      		;;
+		fi
+		;;
+	?)
+		echo "Unknown option, '$OPTION'" >&2
+		echo "Valid options are:"
+		printHelp
+		exit 1
+		;;
 	esac
 done
 stopServer

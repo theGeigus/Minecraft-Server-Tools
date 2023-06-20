@@ -14,29 +14,48 @@ else
 	./update_server.sh -c
 fi
 
-# Backup world(s)
-if [ "${WORLD_BACKUP^^}" == "YES" ]
+if ! command -v inotifywait -v screen > /dev/null
 then
-	./backup_server.sh -a
+     echo "Dependencies are not met, please check that the following programs are installed:"
+	 printf "\t- screen\n"
+	 printf "\t- wget\n"
+	 printf "\t- inotify-tools\n"
+	 printf "\t- unzip\n"
+     exit 1
 fi
 
 # Generate fortune
 if [ "${DO_FORTUNE^^}" == "YES" ]
+then
+	if command -v fortune > /dev/null
 	then
-	echo "Generating fortune..."
+		echo "Generating fortune..."
 
-	echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
-	fortune -s >> announcements.txt
+		echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
+		fortune -s >> announcements.txt
+	else
+		echo "Fortune has not been installed, so a new announcement cannot be generated. Please install fortune-mod and try again."
+		sleep 2
+	fi
 fi
-
-cd "$SERVER_PATH" || echo "Something broke, could not find directory?"
 
 # Check if server is already running
 if [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 then
 	echo "The server is already running"
+
+	# Backup world(s) if someone has been online (used when start server is run automatically each day, otherwise this should never succeed)
+	if [ "${WORLD_BACKUP^^}" == "YES" ]
+	then
+		grep -q "[^[:space:]]" .playedToday 2> /dev/null && ./backup_server.sh -a
+	fi
+
+	rm -f .playedToday
+
 	exit 0
 fi
+
+cd "$SERVER_PATH" || echo "Something broke, could not find directory?"
 
 echo "Starting server..."
 
@@ -71,6 +90,8 @@ PORT=$(grep -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | gr
 
 echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
 
+rm -f .playedToday
+
 # Set day and weather cycle to false until a player joins
 if [ "${NO_PLAYER_ACTION^^}" == "PAUSE" ]
 then
@@ -88,10 +109,11 @@ do
 	if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'Player connected:')" == 'Player connected:' ]
 	then
 
-		# I think I'm making this more complicated than it needs to be... Oh well
 		PLAYER_NAME=$(tail -3 "$TOOLS_PATH/.server.log" | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 3, length($0)-8) }')
 
-		echo "Player Connected - Restarting time!" >> "$TOOLS_PATH/.server.log"
+		echo "Player '$PLAYER_NAME' connected - Restarting time!" >> "$TOOLS_PATH/.server.log"
+		
+		grep -q "$PLAYER_NAME" .playedToday 2> /dev/null || echo "$PLAYER_NAME" >> "$TOOLS_PATH/.playedToday"./stop	
 
 		# Set day and weather cycle to false if set to pause mode
 		if [ "$NO_PLAYER_ACTION" == "PAUSE" ]
@@ -99,13 +121,10 @@ do
 			screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle true \r"
 			screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle true \r"
 		fi
-
-
-		# Check if announcement actually has text in it.
 		
 		# Send player a message after they spawn to make sure they recieve it
 		COUNT=0
-		( while [ $COUNT -lt 10 ] ### Should add counter to cancel if player disconnects before spawning
+		( while [ $COUNT -lt 5 ]
 		do
 			if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
 			then

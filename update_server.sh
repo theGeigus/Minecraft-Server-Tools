@@ -13,21 +13,32 @@ CHECKUPDATE=false
 while getopts 'hsc' OPTION
 do
 	case "$OPTION" in
-		h)
-			printHelp
-			exit 0
-			;;
-        c)
-            CHECKUPDATE=true
-            ;;  
-    	?)
-			echo "Unknown option, '$OPTION'" >&2
-			echo "Valid options are:"
-			printHelp
-			exit 1
-      		;;
+	h)
+        printHelp
+        exit 0
+        ;;
+    c)
+        CHECKUPDATE=true
+        ;;  
+    ?)
+		echo "Unknown option, '$OPTION'" >&2
+		echo "Valid options are:"
+		printHelp
+		exit 1
+    	;;
 	esac
 done
+
+if ! command -v unzip -v wget > /dev/null
+then
+     echo "Dependencies are not met, please check that the following programs are installed:"
+	 printf "\t- screen\n"
+	 printf "\t- wget\n"
+	 printf "\t- inotify-tools\n"
+	 printf "\t- unzip\n"
+     exit 1
+fi
+
 
 # Create server.config if it doesn't exist, eventually should ask things like java/bedrock
 if ! [ -f "./server.config" ]

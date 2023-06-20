@@ -1,10 +1,9 @@
-#My ignored files
 announcements.txt
 .adminAnnouncements.txt
 .hasSeenAnnouncement
-minecraft_version.txt
 .hasSeenAdminAnnouncement
 .prevAnnouncement
 .prevAdminAnnouncement
 server.config
 .server.log
+.playedToday

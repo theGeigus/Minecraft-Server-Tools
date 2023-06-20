@@ -25,36 +25,36 @@ AUTOBACKUP=false
 while getopts 'halb:d:r:' OPTION
 do
 	case "$OPTION" in
-		h)
-			printHelp
-			exit 0
-			;;
-		a)
-            AUTOBACKUP=true
-			GETOPTIONS=false
-			;;
-		l)
-			LIST=true
-			GETOPTIONS=false
-			;;
-		b)
-			BACKUP=$OPTARG
-			GETOPTIONS=false
-			;;
-        r)
-            RESTORE=$OPTARG
-			GETOPTIONS=false
-            ;;
-		d)
-			DELETE=$OPTARG
-			GETOPTIONS=false
-			;;
-    	?)
-			echo "Unknown option, '$OPTION'"
-			echo "Valid options are:"
-			printHelp
-			exit 1
-      		;;
+	h)
+		printHelp
+		exit 0
+		;;
+	a)
+		AUTOBACKUP=true
+		GETOPTIONS=false
+		;;
+	l)
+		LIST=true
+		GETOPTIONS=false
+		;;
+	b)
+		BACKUP=$OPTARG
+		GETOPTIONS=false
+		;;
+	r)
+		RESTORE=$OPTARG
+		GETOPTIONS=false
+		;;
+	d)
+		DELETE=$OPTARG
+		GETOPTIONS=false
+		;;
+	?)
+		echo "Unknown option, '$OPTION'"
+		echo "Valid options are:"
+		printHelp
+		exit 1
+		;;
 	esac
 done
 
@@ -84,7 +84,7 @@ then
 		((i++))
 		((OVERMAX--))
 	done
-
+	
 	exit 0
 fi
 

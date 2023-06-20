@@ -22,21 +22,21 @@ printHelp(){
 while getopts 'ha:p:' OPTION
 do
 	case "$OPTION" in
-		h)
-			printHelp
-			exit 0
-			;;
-		a)
-			ANNOUNCEMENT="$OPTARG"
-			;;
-        p)
-            PLAYER_NAME="$OPTARG"
-            ;;
-    	?)
-			echo "Valid options are:"
-			printHelp
-			exit 1
-      		;;
+    h)
+        printHelp
+        exit 0
+        ;;
+    a)
+        ANNOUNCEMENT="$OPTARG"
+        ;;
+    p)
+        PLAYER_NAME="$OPTARG"
+        ;;
+    ?)
+        echo "Valid options are:"
+        printHelp
+        exit 1
+        ;;
 	esac
 done
 
