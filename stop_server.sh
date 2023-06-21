@@ -59,9 +59,17 @@ stopServer(){
 		echo "Shutting down server!"
 
 		# Send the server a stop message
-		screen -Rd $SERVER_NAME -X stuff "stop \r"
+		screen -Rd $SERVER_NAME -X stuff "stop\r"
 
-		sleep 2
+		sleep 5
+
+		CHECK=$(screen -ls | grep -o "$SERVER_NAME")
+		if [ "$CHECK" == "$SERVER_NAME" ]
+		then
+			echo "Screen is shutting down. Just a moment..."
+			sleep 5
+		fi
+
 	else
 		echo "Server not running, skipping shutdown."
 		exit 0
@@ -76,7 +84,7 @@ stopServer(){
 		# Tell screen to quit
 		screen -Rd "$SERVER_NAME" -X stuff "^A\r:quit\r"
 
-		sleep 2
+		sleep 5
 
 		# Check if server shut down
 		CHECK=$(screen -ls | grep -o "$SERVER_NAME")
@@ -85,7 +93,7 @@ stopServer(){
 			echo "One more try - Attempting to terminate screen..."
 			screen -Rd "$SERVER_NAME" -X stuff "^C\r"
 
-			sleep 2
+			sleep 5
 
 			CHECK=$(screen -ls | grep -o "$SERVER_NAME")
 			if [ "$CHECK" == "$SERVER_NAME" ]
