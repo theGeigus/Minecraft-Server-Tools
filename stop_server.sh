@@ -67,7 +67,13 @@ stopServer(){
 		if [ "$CHECK" == "$SERVER_NAME" ]
 		then
 			echo "Screen is shutting down. Just a moment..."
-			sleep 5
+			i=0
+			while [ "$CHECK" == "$SERVER_NAME" ] && [[ i -lt 5 ]]
+			do
+				sleep 2
+				CHECK=$(screen -ls | grep -o "$SERVER_NAME")
+				((i++))
+			done	
 		fi
 
 	else
