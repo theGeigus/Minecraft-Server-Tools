@@ -39,5 +39,5 @@ AUTO_UPDATE=$AUTO_UPDATE
 
 ### Other fun things!
 
-# Use Fortune to auto-generate a random phrase to announce on each server start-up (requires fortune to be installed). Options are 'YES' or 'NO' (Default is 'NO')
+# Use Fortune to auto-generate a random phrase to announce on each server start-up (requires fortune-mod to be installed). Options are 'YES' or 'NO' (Default is 'NO')
 DO_FORTUNE=\"$DO_FORTUNE\"

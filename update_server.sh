@@ -8,7 +8,7 @@ printHelp(){
     echo "-c: Check if update is avalible, but do not update"
 }
 
-CHECKUPDATE=false
+check_update=false
 # Handle flags
 while getopts 'hsc' OPTION
 do
@@ -18,8 +18,8 @@ do
         exit 0
         ;;
     c)
-        CHECKUPDATE=true
-        ;;  
+        check_update=true
+        ;;
     ?)
 		echo "Unknown option, '$OPTION'" >&2
 		echo "Valid options are:"
@@ -47,28 +47,38 @@ then
 
     source .configDefaults.txt
 
-    read -r -p "Would you like to download Minecraft to the current directory? ($(pwd)) [Y/n] " VAL
+    read -r -p "Would you like to download Minecraft to the current directory? ($(pwd)) [Y/n] " val
 
-    if [[ ! "$VAL" =~ ^([yY][eE][sS]|[yY])$ ]] && [ "$VAL" != "" ]
+    if [[ ! "$val" =~ ^([yY][eE][sS]|[yY])$ ]] && [ "$val" != "" ]
     then
         read -r -p "Where should Minecraft be stored? " SERVER_PATH
 
         SERVER_PATH=$(eval echo "$SERVER_PATH")
 
-        if ! (cd "$SERVER_PATH")
+        if ! (cd "$SERVER_PATH" > /dev/null)
         then
-            echo "Invalid location. Check to make sure this directory ($SERVER_PATH) exists and that you have access to it."
-            exit 1
+            echo "Creating new location: $SERVER_PATH"
+            if ! mkdir -p "$SERVER_PATH"
+            then
+                echo "Invalid location. Check to make sure this directory ($SERVER_PATH) exists and that you have access to it."
+                exit 1
+            fi
         fi
     fi
 
-    while read -r LINE
+    if ! touch "$SERVER_PATH/minecraft_version.txt" 2> /dev/null
+    then
+        echo "Cannot write to directory '$SERVER_PATH', check if you have permisson to write there."
+        exit 1
+    fi
+
+    while read -r line
     do
-       if [ "${LINE:0:1}" == '#' ]
+       if [ "${line:0:1}" == '#' ]
        then
-            echo "$LINE" >> server.config
+            echo "$line" >> server.config
         else
-            eval echo "$LINE" >> server.config
+            eval echo "$line" >> server.config
         fi
     done < ".baseConfig.txt"
 
@@ -77,49 +87,49 @@ fi
 
 source ./server.config
 
-URL="https://www.minecraft.net/en-us/download/server/bedrock" # If planning on Java support in the future, this URL should be set based on the edition we are using.
-AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+url="https://www.minecraft.net/en-us/download/server/bedrock" # If planning on Java support in the future, this URL should be set based on the edition we are using.
+agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 
 echo "Checking for an update..."
-FILE_LINK="$(curl -A "$AGENT" "$URL" 2> /dev/null | grep -o "https://minecraft.azureedge.net/bin-linux/bedrock-server-.*.zip")"
+download_link="$(curl -A "$agent" "$url" 2> /dev/null | grep -o "https://minecraft.azureedge.net/bin-linux/bedrock-server-.*.zip")"
 
-VERSION_NUM=$(echo "$FILE_LINK" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
+version=$(echo "$download_link" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
 
 # Check if version from link matches the current installed version.
-if ! touch "$SERVER_PATH/minecraft_version.txt" >> /dev/null
+if ! touch "$SERVER_PATH/minecraft_version.txt" 2> /dev/null
 then
     echo "Cannot write to directory '$SERVER_PATH', check if you have permisson to write there."
     exit 1
 fi
 
-if [ "$(cat "$SERVER_PATH/minecraft_version.txt")" == "$VERSION_NUM" ]
+if [ "$(cat "$SERVER_PATH/minecraft_version.txt")" == "$version" ]
 then
     echo "Minecraft is already up to date! Currently on version $(cat "$SERVER_PATH/minecraft_version.txt")."
 
     exit 0
 else
-    if $CHECKUPDATE
+    if $check_update
     then
-        echo "There is an update avalible for your server. Minecraft version $VERSION_NUM is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))"
+        echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))"
 
-        [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] && 
-            echo "There is an update avalible for your server. Minecraft version $VERSION_NUM is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
+        [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
+            echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
 
         exit 0
     fi
-        
+
 fi
 
 # Download file
 if [ "$(cat "$SERVER_PATH/minecraft_version.txt")" == "" ]
 then
     echo "new install" > "$SERVER_PATH/minecraft_version.txt" # For message printed later
-    echo "Downloading newest version of Minecraft (Version: $VERSION_NUM). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
+    echo "Downloading newest version of Minecraft (Version: $version). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
 else
-    echo "Update found! Downloading new files for Minecraft version $VERSION_NUM. (Currently on version: $(cat "$SERVER_PATH/minecraft_version.txt"))"
+    echo "Update found! Downloading new files for Minecraft version $version. (Currently on version: $(cat "$SERVER_PATH/minecraft_version.txt"))"
 fi
 
-if ! wget -q --show-progress -O "$SERVER_PATH/minecraft-server-files.zip" "$FILE_LINK"
+if ! wget -q --show-progress -O "$SERVER_PATH/minecraft-server-files.zip" "$download_link"
 then
     echo "Failed to download file"
 fi
@@ -154,9 +164,9 @@ mv -f "$SERVER_PATH/definitions.old/" "$SERVER_PATH/definitions/" && echo "• R
 mv -f "$SERVER_PATH/permissions.json.old" "$SERVER_PATH/permissions.json" && echo "• Restored permissions.json"
 mv -f "$SERVER_PATH/resource_packs.old/" "$SERVER_PATH/resource_packs/" && echo "• Restored resource_packs/"
 mv -f "$SERVER_PATH/server.properties.old" "$SERVER_PATH/server.properties" && echo "• Restored server.properties"
-echo "Done! Your server is now updated to version $VERSION_NUM."
+echo "Done! Your server is now updated to version $version."
 
 [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
-    echo "Minecraft was updated to version $VERSION_NUM. (From $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
+    echo "Minecraft was updated to version $version. (From $(cat "$SERVER_PATH/minecraft_version.txt"))" > .adminAnnouncements.txt
 
-echo "$VERSION_NUM" > "$SERVER_PATH/minecraft_version.txt"
+echo "$version" > "$SERVER_PATH/minecraft_version.txt"

@@ -4,8 +4,6 @@
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 TOOLS_PATH=$(pwd)
 
-### INITIALIZE SERVER ###
-
 # Check for server update
 if ! source server.config 2> /dev/null || [ "$AUTO_UPDATE" == 'YES' ]
 then
@@ -47,13 +45,15 @@ then
 	# Backup world(s) if someone has been online (used when start server is run automatically each day, otherwise this should never succeed)
 	if [ "${WORLD_BACKUP^^}" == "YES" ]
 	then
-		grep -q "[^[:space:]]" .playedToday 2> /dev/null && ./backup_server.sh -a
+		grep -q "[^[:space:]]" "$TOOLS_PATH/.playedToday" 2> /dev/null && ./backup_server.sh -a
 	fi
-
-	rm -f .playedToday
 
 	exit 0
 fi
+
+rm -f "$TOOLS_PATH/.playedToday"
+
+### INITIALIZE SERVER ###
 
 cd "$SERVER_PATH" || echo "Something broke, could not find directory?"
 
@@ -69,8 +69,8 @@ grep -q "No such file or directory" "$TOOLS_PATH/.server.log" &&
 	echo "ERROR: Could not find Minecraft's server files. Check your path in 'server.config' or run 'update_server.sh' and try again."
 
 # Check if server is running, exit if not.
-CHECK=$(screen -ls | grep -o "$SERVER_NAME")
-if [ "$CHECK" != "$SERVER_NAME" ]
+check=$(screen -ls | grep -o "$SERVER_NAME")
+if [ "$check" != "$SERVER_NAME" ]
 then
 	echo "Server failed to start!"
 	exit 1
@@ -86,83 +86,11 @@ do
 done
 
 # An excessive number of grep uses to pull a single number (>_<)
-PORT=$(grep -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+port=$(grep -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
 
-echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$PORT."
+echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$port."
 
 rm -f .playedToday
 
-# Set day and weather cycle to false until a player joins
-if [ "${NO_PLAYER_ACTION^^}" == "PAUSE" ]
-then
-	screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle false \r"
-	screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle false \r"
-fi
-
-#--- MONITOR PLAYER CONNECTION/DISCONNECTION ---
-
-# Loop while server is running
-while [ "$(screen -ls | grep  -o "$SERVER_NAME")" == "$SERVER_NAME" ]
-do
-	# Wait for log update, if player connects set day and weather cycle to true
-	inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log"
-	if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'Player connected:')" == 'Player connected:' ]
-	then
-
-		PLAYER_NAME=$(tail -3 "$TOOLS_PATH/.server.log" | grep "Player connected" | grep -o ': .* xuid' | awk '{ print substr($0, 3, length($0)-8) }')
-
-		echo "Player '$PLAYER_NAME' connected - Restarting time!" >> "$TOOLS_PATH/.server.log"
-		
-		grep -q "$PLAYER_NAME" .playedToday 2> /dev/null || echo "$PLAYER_NAME" >> "$TOOLS_PATH/.playedToday"./stop	
-
-		# Set day and weather cycle to false if set to pause mode
-		if [ "$NO_PLAYER_ACTION" == "PAUSE" ]
-		then
-			screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle true \r"
-			screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle true \r"
-		fi
-		
-		# Send player a message after they spawn to make sure they recieve it
-		COUNT=0
-		( while [ $COUNT -lt 5 ]
-		do
-			if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
-			then
-				"$TOOLS_PATH/announce_server.sh" -p "$PLAYER_NAME"
-				break
-			else
-				inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log"
-				((COUNT+=1))
-			fi
-		done
-		)&
-
-	else
-		# If player disconnects, check for remaining players
-		if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'Player disconnected:')" == "Player disconnected:" ]
-		then
-
-			screen -Rd "$SERVER_NAME" -X stuff "list \r"
-
-			# Wait for file update, if no players are online set day and weather cycle to be false
-			inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log" > /dev/null
-			if [ "$(tail -3 "$TOOLS_PATH/.server.log" | grep -o 'There are 0')" == "There are 0" ]
-			then
-
-				echo "There are no players currently online - pausing time!" >> "$TOOLS_PATH/.server.log"
-
-				if [ "$NO_PLAYER_ACTION" == "PAUSE" ]
-				then
-					# Set day and weather cycle to false
-					screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle false \r"
-					screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle false \r"
-				else 
-					if [ "$NO_PLAYER_ACTION" == "SHUTDOWN" ]
-					then
-						(./stop_server.sh -t 0)
-					fi
-				fi
-			fi
-		fi
-	fi
-done &
+pkill -f "$TOOLS_PATH/.monitor_players.sh"	# Kill process if already running for some reason
+"$TOOLS_PATH/.monitor_players.sh"
