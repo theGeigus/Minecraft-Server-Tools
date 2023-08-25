@@ -4,6 +4,71 @@
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
 TOOLS_PATH=$(pwd)
 
+online() { [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ] || return 1; }
+
+status() {
+
+	if ! online
+	then
+		echo 'The server is currently offline'
+		exit 1
+	fi
+
+	echo 'The server is currently online'
+	exit 0
+}
+
+playerCheck() {
+	screen -Rd "$SERVER_NAME" -X stuff "list \r"
+
+	sleep 2
+
+	if [ "$(tail -3 .server.log | grep -o '] There are 0')" == "] There are 0" ]
+	then
+		echo 'There are currently no players online'
+		exit 1
+	fi
+
+	local number
+	local players
+	number="$(tac .server.log | awk '/] There are/{ print NR; exit }' )"
+	((number--))
+	players="$(tail "-$number" .server.log)"
+
+	echo "Players online: $number"
+	echo "$players"
+
+	exit 0
+}
+
+printHelp(){
+	echo "-h: Show this page and exit"
+	echo "-s Show the current status of the server and exit"
+    echo "-p Print the currently online players and exit"
+}
+
+# Check for arguments
+while getopts 'hsp' OPTION
+do
+	case "$OPTION" in
+    h)
+        printHelp
+        exit 0
+        ;;
+    s)
+        status
+        ;;
+	p)
+		playerCheck
+		;;
+    ?)
+        echo "Valid options are:"
+        printHelp
+        exit 1
+        ;;
+	esac
+done
+
 # Check for server update
 if ! source server.config 2> /dev/null || [ "$AUTO_UPDATE" == 'YES' ]
 then
@@ -32,13 +97,13 @@ then
 		echo "§k~~~§rToday's fortune:§k~~~§r" > announcements.txt
 		fortune -s >> announcements.txt
 	else
-		echo "Fortune has not been installed, so a new announcement cannot be generated. Please install fortune-mod and try again."
+		>&2 echo "Fortune has not been installed, so a new announcement cannot be generated. Please install fortune-mod and try again."
 		sleep 2
 	fi
 fi
 
 # Check if server is already running
-if [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ]
+if online
 then
 	echo "The server is already running"
 
@@ -69,8 +134,7 @@ grep -q "No such file or directory" "$TOOLS_PATH/.server.log" &&
 	echo "ERROR: Could not find Minecraft's server files. Check your path in 'server.config' or run 'update_server.sh' and try again."
 
 # Check if server is running, exit if not.
-check=$(screen -ls | grep -o "$SERVER_NAME")
-if [ "$check" != "$SERVER_NAME" ]
+if ! online
 then
 	echo "Server failed to start!"
 	exit 1

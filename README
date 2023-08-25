@@ -1,22 +1,10 @@
-A collection of Minecraft Bedrock server scripts 
-Created by Geigus
-
-This set of bash scripts allows for easy starting and stopping of a Minecraft bedrock server on a Linux machine.
-I use this set of scripts to run a Minecraft Bedrock server on an Oracle Cloud VM (avalible for free!).
-
-Designed for Linux systems, however this should also work on MacOS without configuration and Windows with WSL enabled if you needed to run it on one of these (Untested on both) 
-Any instructions given will be written with Linux in mind.
-
-
-
 FEATURES:
 
 - Easily starting and stopping server without need to memorize commands.
 - Monitering of player joining and leaving.
 - Automatic pausing/resuming of day/weather cycle when players join and leave.
 - Ability to set server announcements that show any time a player joins the game.
-- Abitily to set script settings in ./config_server.sh such as auto pausing, auto update, and auto backups (LAST TWO OPTIONS STILL UNRELEASED)
-
+- Abitily to set script settings in ./config_server.sh such as auto pausing, auto update, and auto backups
 
 
 DEPENDENCIES:
@@ -26,7 +14,6 @@ This makes use of the following programs that may need to be installed seperatel
 - wget
 - unzip
 - inotify-tools
-
 
 
 SETUP GUIDE:
@@ -43,6 +30,10 @@ EXTRA: To have your sever auto-start, auto-update, automatically backup, etc, cr
     To get in-game messages when your server updates, or has an update, you should add your username to ADMIN_LIST in server.config
 
 
+ATTENTION ARM USERS:
+    Minecraft Bedrock does NOT run on ARM devices, however running this should fix this issue:
+    curl --silent https://raw.githubusercontent.com/FEX-Emu/FEX/main/Scripts/InstallFEX.py --output /tmp/InstallFEX.py && python3 /tmp/InstallFEX.py && rm /tmp/InstallFEX.py
+
 
 FAQ:
 
@@ -51,8 +42,8 @@ My files don't run:
 
 The server starts but I can't connect:
 - Your ports may not be opened. Make sure you are allowing tcp and udp on the ports you will be using. If you are using firewalld, this can be done by running the following (change port numbers if you are not using the defaults):
-    firewall-cmd --zone=public --permanent --add-port=19132-19133/tcp 
-    firewall-cmd --zone=public --permanent --add-port=19132-19133/udp 
+    firewall-cmd --zone=public --permanent --add-port=19132-19133/tcp
+    firewall-cmd --zone=public --permanent --add-port=19132-19133/udp
     firewall-cmd --reload
 
 Minecraft's files / Server tools files? Which is which?
