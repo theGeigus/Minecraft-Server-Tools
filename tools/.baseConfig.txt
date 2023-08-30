@@ -8,10 +8,6 @@
 # Used as the name of the screen, can be anything but needs to be unique if running multiple servers.
 SERVER_NAME=\"$SERVER_NAME\"
 
-# Directory path to server folder location, default should automatically get the server path, but you can change this if you want your server and script files in seperate locations
-# Default is: "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
-SERVER_PATH=\"$SERVER_PATH\"
-
 # What action to take when all players leave. Options are 'NO', 'PAUSE', and 'SHUTDOWN' (Default is 'PAUSE'). Option 'PAUSE' toggles day/weather cycle on players leaving and joining.
 NO_PLAYER_ACTION=\"$NO_PLAYER_ACTION\"
 

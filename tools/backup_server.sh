@@ -67,7 +67,7 @@ if $AUTOBACKUP
 then
 	echo "Running autobackup..."
 	mkdir -p "$BACKUP_PATH"
-	cp -r "$SERVER_PATH/worlds" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
+	cp -r "../server/worlds" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 
 	while read -r LINE
 	do
@@ -84,7 +84,7 @@ then
 		((i++))
 		((OVERMAX--))
 	done
-	
+
 	exit 0
 fi
 
@@ -136,7 +136,7 @@ getOptions(){
 	listBackups
 
 	[ "$VAL" == 1 ] && read -r -p "Enter a name for your backup: " BACKUP
-	
+
 	if [ "$VAL" == 2 ] # TODO: Add check for taken name
 	then
 		read -r -p "Enter the backup to restore: " NUM
@@ -156,7 +156,7 @@ getOptions(){
 		fi
 
 	fi
-	
+
 	if [ "$VAL" == 3 ]
 	then
 
@@ -204,7 +204,7 @@ fi
 if [ "$BACKUP" != "" ]
 then
 	mkdir -p "$BACKUP_PATH"
-	cp -r "$SERVER_PATH/worlds" "${BACKUP_PATH:?}/$BACKUP" &&
+	cp -r "../server/worlds" "${BACKUP_PATH:?}/$BACKUP" &&
 	echo "Successfully created backup '$BACKUP'"
 
 fi
@@ -216,14 +216,14 @@ then
 	mkdir -p "$BACKUP_PATH"
 	BACKUP="AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 	echo "A backup of the current world will be created just incase you want it back. It will be titled: $BACKUP"
-	
-	if ! mv "$SERVER_PATH/worlds" "${BACKUP_PATH:?}/$BACKUP"
+
+	if ! mv "../server/worlds" "${BACKUP_PATH:?}/$BACKUP"
 	then
 		echo "Backup failed, aborting restoration"
 		exit 1
 	fi
 
-	cp -r "${BACKUP_PATH:?}/$RESTORE" "$SERVER_PATH/worlds" && echo "Restored '$RESTORE'"
+	cp -r "${BACKUP_PATH:?}/$RESTORE" "../server/worlds" && echo "Restored '$RESTORE'"
 fi
 
 $GETOPTIONS || exit 0

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Change directory and import variables
-cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke, could not find directory?"
-TOOLS_PATH=$(pwd)
+cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke"
 
 online() { [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ] || return 1; }
 
@@ -110,28 +109,26 @@ then
 	# Backup world(s) if someone has been online (used when start server is run automatically each day, otherwise this should never succeed)
 	if [ "${WORLD_BACKUP^^}" == "YES" ]
 	then
-		grep -q "[^[:space:]]" "$TOOLS_PATH/.playedToday" 2> /dev/null && ./backup_server.sh -a
+		grep -q "[^[:space:]]" ".playedToday" 2> /dev/null && ./backup_server.sh -a
 	fi
 
 	exit 0
 fi
 
-rm -f "$TOOLS_PATH/.playedToday"
+rm -f ".playedToday"
 
 ### INITIALIZE SERVER ###
 
-cd "$SERVER_PATH" || echo "Something broke, could not find directory?"
+cd "../server/" || echo "Something broke, server folder is missing. Make sure Minecraft (run update-server.sh) is installed and try again."
 
 echo "Starting server..."
 
 # Clear previous log file and link it to the screen
-echo "" > "$TOOLS_PATH/.server.log"
-screen -dmS "$SERVER_NAME" -L -Logfile "$TOOLS_PATH/.server.log" bash -c "LD_LIBRARY_PATH=${SERVER_PATH}/ ${SERVER_PATH}/bedrock_server"
+echo "" > "../tools/.server.log"
+screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "LD_LIBRARY_PATH=./ ./bedrock_server"
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
-# Error reporting for wrong directory, we'll let it keep running for now as next step should terminate it anyway.
-grep -q "No such file or directory" "$TOOLS_PATH/.server.log" &&
-	echo "ERROR: Could not find Minecraft's server files. Check your path in 'server.config' or run 'update_server.sh' and try again."
+echo "$(pwd)"
 
 # Check if server is running, exit if not.
 if ! online
@@ -144,17 +141,18 @@ fi
 i=0
 while [[ i -lt 5 ]]
 do
-	grep -q "IPv4" "$TOOLS_PATH/.server.log" && break
-	inotifywait -qq -e MODIFY "$TOOLS_PATH/.server.log"
+	grep -q "IPv4" "../tools/.server.log" && break
+	inotifywait -qq -e MODIFY "../tools/.server.log"
 	((i++))
 done
 
-# An excessive number of grep uses to pull a single number (>_<)
-port=$(grep -m 1 "IPv4" "$TOOLS_PATH/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+# An excessive number of grep uses to pull out a single number (>_<)
+port=$(grep -m 1 "IPv4" "../tools/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
 
 echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$port."
 
 rm -f .playedToday
 
-pkill -f "$TOOLS_PATH/.monitor_players.sh"	# Kill process if already running for some reason
-"$TOOLS_PATH/.monitor_players.sh"
+pkill -f "../tools/.monitor_players.sh"	# Kill process if already running for some reason (It shouldn't be!)
+
+../tools/.monitor_players.sh

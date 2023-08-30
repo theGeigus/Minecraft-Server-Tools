@@ -20,12 +20,12 @@ SETUP GUIDE:
 
 1. Clone the repo or download and extract the zip.
 2. Run update_server.sh to install Minecraft. (If you do not need to set world/config settings, you can ignore this and skip to step 4)
-3. Set your server data in 'server.properties' (in Minecraft's directory, if set seperately), such as name, port, difficulty, etc, and set the actions for your server in 'server.config' (always in this directory, created after updating).
+3. Set your server data in 'server.properties' (in Minecraft's directory, if set seperately), such as name, port, difficulty, etc, and set the actions for your server in 'tools/server.config' (always in this directory, created after updating).
 4. Run ./start_server.sh to start your server, the first run of your server should automatically create your world files.
 5. From this point you should be able to leave your server running, but if you need to shut it down for any reason, run ./stop_server.sh
 
 EXTRA: To have your sever auto-start, auto-update, automatically backup, etc, create a cronjob ($ crontab -e) or similar to run start_server.sh daily. This can be done with cron by adding the following line:
-    @daily /PATH/TO/start_server.sh
+    @daily /PATH/TO/tools/start_server.sh
 
     To get in-game messages when your server updates, or has an update, you should add your username to ADMIN_LIST in server.config
 
