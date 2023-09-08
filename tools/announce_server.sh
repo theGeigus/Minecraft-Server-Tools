@@ -87,14 +87,13 @@ then
             then
                 echo "$player_name" >> .hasSeenAdminAnnouncement
                 printAnnouncements ".adminAnnouncements.txt"
-            else
-                # Check if announcement has been changed.
-                if ! cmp --silent .adminAnnouncements.txt .prevAdminAnnouncement
-                then
-                    echo "$player_name" > .hasSeenAdminAnnouncement
-                    cat .adminAnnouncements.txt > .prevAdminAnnouncement
-                    printAnnouncements ".adminAnnouncements.txt"
-                fi
+
+            # Check if announcement has been changed.
+            elif ! cmp --silent .adminAnnouncements.txt .prevAdminAnnouncement
+            then
+                echo "$player_name" > .hasSeenAdminAnnouncement
+                cat .adminAnnouncements.txt > .prevAdminAnnouncement
+                printAnnouncements ".adminAnnouncements.txt"
             fi
         fi
     fi
@@ -116,16 +115,15 @@ then
         then
             echo "$player_name" >> .hasSeenAnnouncement
             printAnnouncements "announcements.txt"
-        else
-            # Check if announcement has been changed.
-            if ! cmp --silent announcements.txt .prevAnnouncement
-            then
-                echo "$player_name" > .hasSeenAnnouncement
-                cat announcements.txt > .prevAnnouncement
-                printAnnouncements "announcements.txt"
-            fi
+
+        # Check if announcement has been changed.
+        elif ! cmp --silent announcements.txt .prevAnnouncement
+        then
+            echo "$player_name" > .hasSeenAnnouncement
+            cat announcements.txt > .prevAnnouncement
+            printAnnouncements "announcements.txt"
         fi
-    else
-        printAnnouncements "announcements.txt"
     fi
+else
+    printAnnouncements "announcements.txt"
 fi

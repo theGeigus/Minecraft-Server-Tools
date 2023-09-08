@@ -31,7 +31,10 @@ BACKUP_PATH=\"$BACKUP_PATH\"
 BACKUP_NUM=\"$BACKUP_NUM\"
 
 # Auto-update server on each startup if avalible. If set to 'NO', a check for an update will still be made. Options are 'YES' or 'NO' (Default is 'YES')
-AUTO_UPDATE=$AUTO_UPDATE
+AUTO_UPDATE=\"$AUTO_UPDATE\"
+
+# Minecraft Edition ***CHANGING THIS WILL CREATE A NEW WORLD*** Options are 'BEDROCK' or 'JAVA'
+EDITION=\"$EDITION\"
 
 ### Other fun things!
 

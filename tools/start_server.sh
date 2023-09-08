@@ -3,6 +3,42 @@
 # Change directory and import variables
 cd "$(dirname "${BASH_SOURCE[0]}")" || echo "Something broke"
 
+printHelp(){
+	echo "-h: Show this page and exit"
+	echo "-s Show the current status of the server and exit"
+    echo "-p Print the currently online players and exit"
+}
+
+# Check for arguments
+while getopts 'hsp' OPTION
+do
+	case "$OPTION" in
+    h)
+        printHelp
+        exit 0
+        ;;
+    s)
+        status
+        ;;
+	p)
+		playerCheck
+		;;
+    ?)
+        echo "Valid options are:"
+        printHelp
+        exit 1
+        ;;
+	esac
+done
+
+# Check for server update
+if ! source server.config 2> /dev/null || [ "$AUTO_UPDATE" == 'YES' ]
+then
+	./update_server.sh
+else
+	./update_server.sh -c
+fi
+
 online() { [ "$(screen -ls | grep -o "$SERVER_NAME")" == "$SERVER_NAME" ] || return 1; }
 
 status() {
@@ -39,42 +75,6 @@ playerCheck() {
 
 	exit 0
 }
-
-printHelp(){
-	echo "-h: Show this page and exit"
-	echo "-s Show the current status of the server and exit"
-    echo "-p Print the currently online players and exit"
-}
-
-# Check for arguments
-while getopts 'hsp' OPTION
-do
-	case "$OPTION" in
-    h)
-        printHelp
-        exit 0
-        ;;
-    s)
-        status
-        ;;
-	p)
-		playerCheck
-		;;
-    ?)
-        echo "Valid options are:"
-        printHelp
-        exit 1
-        ;;
-	esac
-done
-
-# Check for server update
-if ! source server.config 2> /dev/null || [ "$AUTO_UPDATE" == 'YES' ]
-then
-	./update_server.sh
-else
-	./update_server.sh -c
-fi
 
 if ! command -v inotifywait -v screen > /dev/null
 then
@@ -119,7 +119,7 @@ rm -f ".playedToday"
 
 ### INITIALIZE SERVER ###
 
-cd "../server/" || echo "Something broke, server folder is missing. Make sure Minecraft (run update-server.sh) is installed and try again."
+cd "../${EDITION,,}-server/" || echo "Something broke, server folder is missing. Make sure Minecraft (run update-server.sh) is installed and try again."
 
 echo "Starting server..."
 
@@ -127,8 +127,6 @@ echo "Starting server..."
 echo "" > "../tools/.server.log"
 screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "LD_LIBRARY_PATH=./ ./bedrock_server"
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
-
-echo "$(pwd)"
 
 # Check if server is running, exit if not.
 if ! online

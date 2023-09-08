@@ -27,12 +27,11 @@ setStatus() {
                 # Set day and weather cycle to false
                 screen -Rd "$SERVER_NAME" -X stuff "gamerule dodaylightcycle $status \r"
                 screen -Rd "$SERVER_NAME" -X stuff "gamerule doweathercycle $status \r"
-            else
-                if [ "$online" == 0 ] && [ "$NO_PLAYER_ACTION" == "SHUTDOWN" ]
-                then
-                    echo "There are no players currently online - shutting down server!" >> .server.log
-                    (./stop_server.sh -t 0)
-                fi
+            elif [ "$online" == 0 ] && [ "$NO_PLAYER_ACTION" == "SHUTDOWN" ]
+            then
+                echo "There are no players currently online - shutting down server!" >> .server.log
+                (./stop_server.sh -t 0)
+
             fi
 }
 

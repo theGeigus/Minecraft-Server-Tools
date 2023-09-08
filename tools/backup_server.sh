@@ -16,7 +16,7 @@ printHelp(){
 	echo "-l: List backups and exit."
 	echo "-r NAME: Restore backup with the supplied name."
 	echo "-d NAME: Delete backup with the supplied name. Will NOT ask for confirmation!"
-	echo "-a: Auto backup mode, will run backup and name automatically, however backups will be deleted when max is reached.    	"
+	echo "-a: Auto backup mode, will run backup and name automatically, however backups will be deleted when max is reached."
 }
 
 GETOPTIONS=true
@@ -61,13 +61,14 @@ done
 ### World Backup ###
 
 BACKUP_PATH="$(eval echo "$BACKUP_PATH")"
+serverPath="${EDITION,,}-server"
 
 # Autobackup
 if $AUTOBACKUP
 then
 	echo "Running autobackup..."
 	mkdir -p "$BACKUP_PATH"
-	cp -r "../server/worlds" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
+	cp -r "../$serverPath/worlds" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 
 	while read -r LINE
 	do
@@ -204,7 +205,7 @@ fi
 if [ "$BACKUP" != "" ]
 then
 	mkdir -p "$BACKUP_PATH"
-	cp -r "../server/worlds" "${BACKUP_PATH:?}/$BACKUP" &&
+	cp -r "../$serverPath/worlds" "${BACKUP_PATH:?}/$BACKUP" &&
 	echo "Successfully created backup '$BACKUP'"
 
 fi
@@ -217,13 +218,13 @@ then
 	BACKUP="AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 	echo "A backup of the current world will be created just incase you want it back. It will be titled: $BACKUP"
 
-	if ! mv "../server/worlds" "${BACKUP_PATH:?}/$BACKUP"
+	if ! mv "../$serverPath/worlds" "${BACKUP_PATH:?}/$BACKUP"
 	then
 		echo "Backup failed, aborting restoration"
 		exit 1
 	fi
 
-	cp -r "${BACKUP_PATH:?}/$RESTORE" "../server/worlds" && echo "Restored '$RESTORE'"
+	cp -r "${BACKUP_PATH:?}/$RESTORE" "../$serverPath/worlds" && echo "Restored '$RESTORE'"
 fi
 
 $GETOPTIONS || exit 0

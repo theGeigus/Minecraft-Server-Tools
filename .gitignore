@@ -7,4 +7,5 @@ tools/.prevAdminAnnouncement
 tools/server.config
 tools/.server.log
 tools/.playedToday
-server/
+bedrock-server
+java-server

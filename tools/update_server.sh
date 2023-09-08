@@ -47,26 +47,38 @@ then
 
     source .configDefaults.txt
 
-    # read -r -p "Would you like to download Minecraft to the current directory? ($(pwd)) [Y/n] " val
+    declare val
 
-    # if [[ ! "$val" =~ ^([yY][eE][sS]|[yY])$ ]] && [ "$val" != "" ]
-    # then
-    #     read -r -p "Where should Minecraft be stored? " SERVER_PATH
+    while [ "$val" != 1 ] && [ "$val" != 2 ]
+    do
 
-    #     SERVER_PATH=$(eval echo "../server")
+        echo "What edition of Minecraft will this server be?"
+        printf "\t1. Bedrock Edition\n"
+        printf "\t2. Java Edition\n"
+        read -r -p  "Enter number: " val
 
-    #     if ! (cd "../server" > /dev/null)
-    #     then
-    #         echo "Creating new location: ../server"
-    #         if ! mkdir -p "../server"
-    #         then
-    #             echo "Invalid location. Check to make sure this directory (../server) exists and that you have access to it."
-    #             exit 1
-    #         fi
-    #     fi
-    # fi
+    done
 
-    if ! touch "../server/minecraft_version.txt" 2> /dev/null
+    if [ "$val" == 1 ]
+    then
+        EDITION="BEDROCK"
+        serverPath="bedrock-server"
+    else
+        EDITION="JAVA"
+        serverPath="java-server"
+    fi
+
+    if ! (cd "../$serverPath" > /dev/null)
+    then
+        echo "Creating new location: ../$serverPath"
+        if ! mkdir -p "../$serverPath"
+        then
+            echo "Invalid location. Check to make sure you have permission to access this directory. ($(cd .. && pwd)/$serverPath)"
+            exit 1
+        fi
+    fi
+
+    if ! touch "../$serverPath/minecraft_version.txt" 2> /dev/null
     then
         echo "Cannot write to directory '$(cd .. && pwd)/server', check if you have permisson to write there."
         exit 1
@@ -86,87 +98,114 @@ then
 fi
 
 source ./server.config
+serverPath="${EDITION,,}-server/"
 
-url="https://www.minecraft.net/en-us/download/server/bedrock" # If planning on Java support in the future, this URL should be set based on the edition we are using.
 agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-
 echo "Checking for an update..."
-download_link="$(curl -A "$agent" "$url" 2> /dev/null | grep -o "https://minecraft.azureedge.net/bin-linux/bedrock-server-.*.zip")"
 
-version=$(echo "$download_link" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
-
-# Check if version from link matches the current installed version.
-if ! touch "../server/minecraft_version.txt" 2> /dev/null
+if [ "${EDITION^^}" == "BEDROCK" ]
 then
-    echo "Cannot write to directory '../server', check if you have permisson to write there."
+    url="https://www.minecraft.net/en-us/download/server/bedrock"
+    download_link="$(curl -A "$agent" "$url" 2> /dev/null | grep -o "https://minecraft.azureedge.net/bin-linux/bedrock-server-.*.zip")"
+    version=$(echo "$download_link" | grep -o "bedrock-server-.*.zip" | awk '{ print substr($0, 16, length($0)-19) }')
+
+elif [ "${EDITION^^}" == "JAVA" ]
+then
+    url="https://www.minecraft.net/en-us/download/server"
+    # Because of course Java Edition wouldn't put its version number neatly in the download URL like Bedrock would. :(
+    web="$(curl -A "$agent" "$url" 2> /dev/null)"
+    echo "$web" > test.txt
+    download_link="$(echo "$web" | grep -o -m 1 "https://piston-data.mojang.com/v1/objects/.*/server.jar")"
+    version="$(echo "$web" | grep -o -m 1 "minecraft_server.*.jar" | awk '{ print substr($0, 18, length($0)-21) }' )"
+else
+    echo "Invalid version, check your server.config and try again"
     exit 1
 fi
 
-if [ "$(cat "../server/minecraft_version.txt")" == "$version" ]
+# Check if version from link matches the current installed version.
+if ! touch "../$serverPath/minecraft_version.txt" 2> /dev/null
 then
-    echo "Minecraft is already up to date! Currently on version $(cat "../server/minecraft_version.txt")."
+    echo "Cannot write to directory '$(cd .. && pwd)/$serverPath', check if you have permisson to write there."
+    exit 1
+fi
+
+if [ "$(cat "../$serverPath/minecraft_version.txt")" == "$version" ]
+then
+    echo "Minecraft is already up to date! Currently on version $(cat "../$serverPath/minecraft_version.txt")."
 
     exit 0
-else
-    if $check_update
-    then
-        echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "../server/minecraft_version.txt"))"
+elif $check_update
+then
+    echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "../$serverPath/minecraft_version.txt"))"
 
-        [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
-            echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "../server/minecraft_version.txt"))" > .adminAnnouncements.txt
+    [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
+        echo "There is an update avalible for your server. Minecraft version $version is now avalible. (Currently on version $(cat "../$serverPath/minecraft_version.txt"))" > .adminAnnouncements.txt
 
-        exit 0
-    fi
-
+    exit 0
 fi
 
 # Download file
-if [ "$(cat "../server/minecraft_version.txt")" == "" ]
+if [ "$(cat "../$serverPath/minecraft_version.txt")" == "" ]
 then
-    echo "new install" > "../server/minecraft_version.txt" # For message printed later
-    echo "Downloading newest version of Minecraft (Version: $version). If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
+    echo "new install" > "../$serverPath/minecraft_version.txt" # For message printed later
+    echo "Downloading newest version of Minecraft (Version: $version)."
+    [ "${EDITION^^}" == "BEDROCK" ] && echo "If this is your first time installing Minecraft on this device, don't worry about any copy errors below."
 else
-    echo "Update found! Downloading new files for Minecraft version $version. (Currently on version: $(cat "../server/minecraft_version.txt"))"
+    echo "Update found! Downloading new files for Minecraft version $version. (Currently on version: $(cat "../$serverPath/minecraft_version.txt"))"
 fi
 
-if ! wget -q --show-progress -O "../server/minecraft-server-files.zip" "$download_link"
+if [ "${EDITION^^}" == "BEDROCK" ]
 then
-    echo "Failed to download file"
+    if ! wget -q --show-progress -O "../$serverPath/minecraft-server-files.zip" "$download_link"
+    then
+        echo "Failed to download file"
+        exit 1
+    fi
+
+    echo "Finished downloading files"
+
+    # Stop server if running, wait 15 minutes if there are players online
+    ./stop_server.sh -t 15 || exit 1
+
+    # Copy these files so they are not overwritten by the update
+    echo "Making a copy of your server files so the new ones won't overwrite them..."
+    mv "../$serverPath/allowlist.json" "../$serverPath/allowlist.json.old" && echo "• Copied allowlist.json"
+    mv "../$serverPath/behavior_packs/" "../$serverPath/behavior_packs.old/" && echo "• Copied behavior_packs/"
+    mv "../$serverPath/config/" "../$serverPath/config.old/" && echo "• Copied config/"
+    mv "../$serverPath/definitions/" "../$serverPath/definitions.old/" && echo "• Copied definitions/"
+    mv "../$serverPath/permissions.json" "../$serverPath/permissions.json.old" && echo "• Copied permissions.json"
+    mv "../$serverPath/resource_packs/" "../$serverPath/resource_packs.old/" && echo "• Copied resource_packs/"
+    mv "../$serverPath/server.properties" "../$serverPath/server.properties.old" && echo "• Copied server.properties"
+
+    # Extract new files
+    echo "Extracting new server files..."
+    (cd "../$serverPath" && unzip -o "../$serverPath/minecraft-server-files.zip" > /dev/null && rm "../$serverPath/minecraft-server-files.zip")
+    echo "Extraction complete!"
+
+    # Restore the old files
+    ### TODO: Check how these mergre/replace (e.g. not put folders inside folders)
+    echo "Finally, restoring copies..."
+    mv -f "../$serverPath/allowlist.json.old" "../$serverPath/allowlist.json" && echo "• Restored allowlist.json"
+    mv -f "../$serverPath/behavior_packs.old/" "../$serverPath/behavior_packs/" && echo "• Restored behavior_packs/"
+    mv -f "../$serverPath/config.old/" "../$serverPath/config/" && echo "• Restored config/"
+    mv -f "../$serverPath/definitions.old/" "../$serverPath/definitions/" && echo "• Restored definitions/"
+    mv -f "../$serverPath/permissions.json.old" "../$serverPath/permissions.json" && echo "• Restored permissions.json"
+    mv -f "../$serverPath/resource_packs.old/" "../$serverPath/resource_packs/" && echo "• Restored resource_packs/"
+    mv -f "../$serverPath/server.properties.old" "../$serverPath/server.properties" && echo "• Restored server.properties"
+else
+    # Clearly updating Java Edition is SIGNIFICANTLY easier...
+    if ! wget -q --show-progress -O "../$serverPath/java_server.jar" "$download_link"
+    then
+        echo "Failed to download file"
+        exit 1
+    fi
+
+    echo "Finished downloading files"
 fi
 
-echo "Finished downloading files"
-
-# Stop server if running, wait 15 minutes if there are players online
-./stop_server.sh -t 15 || exit 1
-
-# Copy these files so they are not overwritten by the update
-echo "Making a copy of your server files so the new ones won't overwrite them..."
-mv "../server/allowlist.json" "../server/allowlist.json.old" && echo "• Copied allowlist.json"
-mv "../server/behavior_packs/" "../server/behavior_packs.old/" && echo "• Copied behavior_packs/"
-mv "../server/config/" "../server/config.old/" && echo "• Copied config/"
-mv "../server/definitions/" "../server/definitions.old/" && echo "• Copied definitions/"
-mv "../server/permissions.json" "../server/permissions.json.old" && echo "• Copied permissions.json"
-mv "../server/resource_packs/" "../server/resource_packs.old/" && echo "• Copied resource_packs/"
-mv "../server/server.properties" "../server/server.properties.old" && echo "• Copied server.properties"
-
-# Extract new files
-echo "Extracting new server files..."
-(cd "../server" && unzip -o "../server/minecraft-server-files.zip" > /dev/null && rm "../server/minecraft-server-files.zip")
-echo "Extraction complete!"
-
-# Restore the old files
-### TODO: Check how these mergre/replace (e.g. not put folders inside folders)
-echo "Finally, restoring copies..."
-mv -f "../server/allowlist.json.old" "../server/allowlist.json" && echo "• Restored allowlist.json"
-mv -f "../server/behavior_packs.old/" "../server/behavior_packs/" && echo "• Restored behavior_packs/"
-mv -f "../server/config.old/" "../server/config/" && echo "• Restored config/"
-mv -f "../server/definitions.old/" "../server/definitions/" && echo "• Restored definitions/"
-mv -f "../server/permissions.json.old" "../server/permissions.json" && echo "• Restored permissions.json"
-mv -f "../server/resource_packs.old/" "../server/resource_packs/" && echo "• Restored resource_packs/"
-mv -f "../server/server.properties.old" "../server/server.properties" && echo "• Restored server.properties"
 echo "Done! Your server is now updated to version $version."
 
 [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ] &&
-    echo "Minecraft was updated to version $version. (From $(cat "../server/minecraft_version.txt"))" > .adminAnnouncements.txt
+    echo "Minecraft was updated to version $version. (From $(cat "../$serverPath/minecraft_version.txt"))" > .adminAnnouncements.txt
 
-echo "$version" > "../server/minecraft_version.txt"
+echo "$version" > "../$serverPath/minecraft_version.txt"
