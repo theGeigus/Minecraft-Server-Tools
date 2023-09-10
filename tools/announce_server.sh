@@ -18,6 +18,13 @@ printHelp(){
     echo "-p PLAYER: Send announcement to only the given player"
 }
 
+announce() {
+    # Print message with tellraw
+    announcement="{\"text\": \"$announcement\"}"
+    [ "${EDITION^^}" == "BEDROCK" ] && announcement="{\"rawtext\": [$announcement]}"
+    screen -Rd "$SERVER_NAME" -X stuff "tellraw $player_name $announcement\r"
+}
+
 # Check for arguments
 while getopts 'ha:p:' OPTION
 do
@@ -26,11 +33,19 @@ do
         printHelp
         exit 0
         ;;
-    a)
-        announcement="$OPTARG"
-        ;;
     p)
         player_name="$OPTARG"
+        ;;
+    a)
+        # If no player name is supplied, announce to everyone.
+        if [ "$player_name" == "" ]
+        then
+            player_name="@a"
+        fi
+        announcement="$(echo "$OPTARG" | sed -r 's/\\+/\\\\/g')" # Add extra backslashes any time the user uses one
+
+        announce
+        exit 0
         ;;
     ?)
         echo "Valid options are:"
@@ -47,83 +62,64 @@ then
 fi
 
 # Announcement system, defined as a function for easy use with cases below.
-printAnnouncements() {
+getAnnouncements() {
+    announcement=""
 
-    if grep -q -P -m 1 "[^s]" "$1"
-    then
-        # Add each line to the announcement
-
-        if [ "$announcement" == "" ]
-        then
-            while read -r line
-            do
-                line=$(echo "$line" | sed -r 's/"+/\\\\"/g') # Escape any double quotes
-                announcement+="$line\\\n"
-            done < "$1"
-        else
-            announcement=$(echo "$announcement" | sed -r 's/"+/\\\\"/g')
-            announcement=$(echo "$announcement" | sed -r 's/\\+/\\\\/g') # Add extra backslashes any time the user uses one
-        fi
-
-        # Wait 1 sec to make sure player actually recieves it.
-        sleep 1;
-
-        # Print message with tellraw
-        screen -Rd "$SERVER_NAME" -X stuff "tellraw $player_name {\"rawtext\": [{\"text\": \"$announcement\"}]}\r"
-    fi
+    # Add each line to the announcement
+    while read -r line
+    do
+        line=$(echo "$line" | sed -r 's/"+/\\\\"/g') # Escape any double quotes
+        announcement+="$line\\\n"
+    done < "$1"
 }
 
 # Cases for admin announcement handling
-if [ "$announcement" == "" ] && [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
+if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
 then
     touch .adminAnnouncements.txt
     touch .hasSeenAdminAnnouncement
-    # If set to once, check if seen
-    if [ "$(echo "$ADMIN_LIST" | grep -o "$player_name")" == "$player_name" ] #
+
+    getAnnouncements .adminAnnouncements.txt
+    if [ "$(echo "$ADMIN_LIST" | grep -o "$player_name")" == "$player_name" ]
     then
         if [ "${DO_ADMIN_ANNOUNCEMENTS^^}" == "ONCE" ]
         then
             if ! grep -q -o "$player_name" .hasSeenAdminAnnouncement
             then
                 echo "$player_name" >> .hasSeenAdminAnnouncement
-                printAnnouncements ".adminAnnouncements.txt"
-
-            # Check if announcement has been changed.
+                announce
             elif ! cmp --silent .adminAnnouncements.txt .prevAdminAnnouncement
             then
                 echo "$player_name" > .hasSeenAdminAnnouncement
                 cat .adminAnnouncements.txt > .prevAdminAnnouncement
-                printAnnouncements ".adminAnnouncements.txt"
+                announce
             fi
+        else
+            announce
         fi
     fi
-
-    announcement="" #Set announcement back to "" so regular announcement will run
-
 fi
 
     # Cases for Announcement handling, check if enabled
-if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ] || [ "$player_name" != "" ]
+if [ "${DO_ANNOUNCEMENTS^^}" == "YES" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
 then
     touch announcements.txt
     touch .hasSeenAnnouncement
-    # If set to once, check if seen
-    if [ "$player_name" == "" ] || [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
-    then
 
+    getAnnouncements announcements.txt
+    # If set to once, check if seen
+    if [ "${DO_ANNOUNCEMENTS^^}" == "ONCE" ]
+    then
         if ! grep -q -o "$player_name" .hasSeenAnnouncement
         then
             echo "$player_name" >> .hasSeenAnnouncement
-            printAnnouncements "announcements.txt"
-
-        # Check if announcement has been changed.
         elif ! cmp --silent announcements.txt .prevAnnouncement
         then
             echo "$player_name" > .hasSeenAnnouncement
             cat announcements.txt > .prevAnnouncement
-            printAnnouncements "announcements.txt"
+        else
+            exit 0
         fi
     fi
-else
-    printAnnouncements "announcements.txt"
+    announce
 fi

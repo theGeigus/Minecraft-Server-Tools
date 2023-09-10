@@ -43,43 +43,28 @@ while [ "$(screen -ls | grep  -o "$SERVER_NAME")" == "$SERVER_NAME" ]
 do
 	# Wait for log update, if player connects set day and weather cycle to true
 	inotifywait -qq -e MODIFY .server.log
-	if [ "$(tail -1 .server.log | grep -o 'Player connected:')" == 'Player connected:' ]
+    line="$(tail -1 .server.log)"
+	if [ "$(echo "$line" | grep -o 'Player Spawned:')" == 'Player Spawned:' ] || [ "$(echo "$line" | grep -o 'joined the game')" == "joined the game" ]
 	then
+        [ "${EDITION^^}" == "BEDROCK" ] && player_name=$(echo "$line"| grep -n -o ': .* xuid' | awk '{ print substr($0, 5, length($0)-9) }')
+		[ "${EDITION^^}" == "JAVA" ] && player_name=$(echo "$line" | grep -n -o ': .* joined the game' | awk '{ print substr($0, 5, length($0)-20) }')
 
-		player_name=$(tail -3 .server.log | grep "Player connected" | grep -n -o ': .* xuid' | awk '{ print substr($0, 5, length($0)-10) }')
+        echo "$player_name" >> .server.log
+        grep -q "$player_name" .playedToday 2> /dev/null || echo "$player_name" >> .playedToday
+        setStatus 1
+		./announce_server.sh -p "$player_name"
 
-		grep -q "$player_name" .playedToday 2> /dev/null || echo "$player_name" >> .playedToday
+    # If player disconnects, check for remaining players
+	elif [ "$(echo "$line" | grep -o 'Player disconnected:')" == "Player disconnected:" ] || [ "$(echo "$line" | grep -o 'left the game')" == "left the game" ]
+    then
 
-		setStatus 1
+        screen -Rd "$SERVER_NAME" -X stuff "list\r"
 
-		# Send player a message after they spawn to make sure they recieve it
-		i=0
-		( while [ $i -lt 5 ]
-		do
-			if [ "$(tail -1 .server.log | grep -o 'Player Spawned:')" == 'Player Spawned:' ]
-			then
-				./announce_server.sh -p "$player_name"
-				exit
-			else
-				inotifywait -qq -e MODIFY .server.log
-				((COUNT+=1))
-			fi
-		done
-		)&
+        sleep 2
 
-	else
-		# If player disconnects, check for remaining players
-		if [ "$(tail -1 .server.log | grep -o 'Player disconnected:')" == "Player disconnected:" ]
+        if [ "$(tail -3 .server.log | grep -o 'There are 0')" == "There are 0" ]
         then
-
-            screen -Rd "$SERVER_NAME" -X stuff "list\r"
-
-            sleep 2
-
-			if [ "$(tail -3 .server.log | grep -o 'There are 0')" == "There are 0" ]
-			then
-                setStatus 0
-            fi
+            setStatus 0
         fi
-	fi
+    fi
 done &

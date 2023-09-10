@@ -114,7 +114,6 @@ then
     url="https://www.minecraft.net/en-us/download/server"
     # Because of course Java Edition wouldn't put its version number neatly in the download URL like Bedrock would. :(
     web="$(curl -A "$agent" "$url" 2> /dev/null)"
-    echo "$web" > test.txt
     download_link="$(echo "$web" | grep -o -m 1 "https://piston-data.mojang.com/v1/objects/.*/server.jar")"
     version="$(echo "$web" | grep -o -m 1 "minecraft_server.*.jar" | awk '{ print substr($0, 18, length($0)-21) }' )"
 else
