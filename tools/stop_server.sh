@@ -50,7 +50,7 @@ echo "Checking if server is running..."
 check=$(screen -ls | grep -o $SERVER_NAME)
 if [ "$check" == "$SERVER_NAME" ]
 then
-	screen -Rd "$SERVER_NAME" -X stuff "list \r"
+	screen -Rd "$SERVER_NAME" -X stuff "list\r"
 	inotifywait -qq -e MODIFY .server.log > /dev/null
 	# Check if any players are currently online, or if time is set
 	if [ "$time" != 0 ] && [ "$(tail -3 .server.log | grep -o 'There are 0')" != "There are 0" ]

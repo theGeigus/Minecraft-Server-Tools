@@ -69,7 +69,7 @@ printAnnouncements() {
         sleep 1;
 
         # Print message with tellraw
-        screen -Rd "$SERVER_NAME" -X stuff "tellraw $player_name {\"rawtext\": [{\"text\": \"$announcement\"}]} \r"
+        screen -Rd "$SERVER_NAME" -X stuff "tellraw $player_name {\"rawtext\": [{\"text\": \"$announcement\"}]}\r"
     fi
 }
 

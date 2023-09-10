@@ -54,7 +54,7 @@ status() {
 }
 
 playerCheck() {
-	screen -Rd "$SERVER_NAME" -X stuff "list \r"
+	screen -Rd "$SERVER_NAME" -X stuff "list\r"
 
 	sleep 2
 
@@ -125,7 +125,16 @@ echo "Starting server..."
 
 # Clear previous log file and link it to the screen
 echo "" > "../tools/.server.log"
-screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "LD_LIBRARY_PATH=./ ./bedrock_server"
+
+if [ "${EDITION^^}" == "BEDROCK" ]
+then
+	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "LD_LIBRARY_PATH=./ ./bedrock_server"
+elif [ "${EDITION^^}" == "JAVA" ]
+then
+	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "java -Xmx1024M -Xms1024M -jar java_server.jar nogui"
+else
+	echo "Invalid edition, check server.config and try again."
+fi
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
 # Check if server is running, exit if not.
@@ -135,17 +144,24 @@ then
 	exit 1
 fi
 
-# Wait for IPv4 address to be avalible
+# Wait for IPv4 address to be avalible, or if Java, check if EULA has been accepted.
 i=0
 while [[ i -lt 5 ]]
 do
 	grep -q "IPv4" "../tools/.server.log" && break
-	inotifywait -qq -e MODIFY "../tools/.server.log"
+	grep -q "Starting Minecraft server on" "../tools/.server.log" && break
+	if grep -q "You need to agree to the EULA in order to run the server" "../tools/.server.log"
+	then
+		echo "You need to agree to the EULA in order to run the server, see java-server/eula.txt for more info."
+		exit 1
+	fi
+	inotifywait -qq -t 5 -e MODIFY "../tools/.server.log"
 	((i++))
 done
 
 # An excessive number of grep uses to pull out a single number (>_<)
-port=$(grep -m 1 "IPv4" "../tools/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+[ "${EDITION^^}" == "BEDROCK" ] && port=$(grep -m 1 "IPv4" "../tools/.server.log" | grep -o -P " port: \d+" | grep -o -P "\d+")
+[ "${EDITION^^}" == "JAVA" ] && port=$(grep "Starting Minecraft server on" "../tools/.server.log" | grep -o -P "\*:\d+" | grep -o -P "\d+")
 
 echo "Server has started successfully - You can connect at $(curl -s ifconfig.me):$port."
 
