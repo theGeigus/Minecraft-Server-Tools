@@ -193,6 +193,7 @@ then
     mv -f "../$serverPath/server.properties.old" "../$serverPath/server.properties" && echo "• Restored server.properties"
 else
     # Clearly updating Java Edition is SIGNIFICANTLY easier...
+    ./stop_server.sh -t 15 || exit 1
     if ! wget -q --show-progress -O "../$serverPath/java_server.jar" "$download_link"
     then
         echo "Failed to download file"
