@@ -123,24 +123,24 @@ cd "../${EDITION,,}-server/" || echo "Something broke, server folder is missing.
 
 echo "Starting server..."
 
-# Clear previous log file and link it to the screen
-echo "" > "../tools/.server.log"
-
 if [ "${EDITION^^}" == "BEDROCK" ]
 then
+	echo 'Starting Minecraft: Bedrock Edition' > ../tools/.server.log
 	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "LD_LIBRARY_PATH=./ ./bedrock_server"
 elif [ "${EDITION^^}" == "JAVA" ]
 then
+	echo 'Starting Minecraft: Java Edition' > ../tools/.server.log
 	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "java -Xmx1024M -Xms1024M -jar java_server.jar nogui"
 else
 	echo "Invalid edition, check server.config and try again."
+	exit 1
 fi
 screen -Rd "$SERVER_NAME" -X logfile flush 1 # 1 sec delay to file logging as instant logging was too fast to handle properly
 
 # Check if server is running, exit if not.
 if ! online
 then
-	echo "Server failed to start!"
+	echo "Server failed to start! Check 'tools/.server.log' for more information."
 	exit 1
 fi
 

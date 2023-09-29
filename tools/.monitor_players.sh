@@ -66,5 +66,15 @@ do
         then
             setStatus 0
         fi
+
+    # Case for if server crashes, this is how Java Edition crashes print out... Add Bedrock's format later
+    elif [ "$(echo "$line" | grep -o 'This crash report has been saved')" == "This crash report has been saved" ]
+    then
+        if [ "${RESTART_ON_CRASH^^}" == "YES" ]
+        then
+            ./stop_server.sh # Should have stopped already, but might as well check anyway
+            ./start_server.sh
+            exit 1
+        fi
     fi
 done &

@@ -61,14 +61,23 @@ done
 ### World Backup ###
 
 BACKUP_PATH="$(eval echo "$BACKUP_PATH")"
-serverPath="${EDITION,,}-server"
+if [ "${EDITION^^}" == "BEDROCK" ]
+then
+	serverPath="bedrock-server/worlds"
+elif [ "${EDITION^^}" == "JAVA" ]
+then
+	serverPath="java-server/world"
+else
+	echo "Invalid version, check your server.config and try again"
+    exit 1
+fi
 
 # Autobackup
 if $AUTOBACKUP
 then
 	echo "Running autobackup..."
 	mkdir -p "$BACKUP_PATH"
-	cp -r "../$serverPath/worlds" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
+	cp -r "../$serverPath/" "$BACKUP_PATH/AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 
 	while read -r LINE
 	do
@@ -205,7 +214,7 @@ fi
 if [ "$BACKUP" != "" ]
 then
 	mkdir -p "$BACKUP_PATH"
-	cp -r "../$serverPath/worlds" "${BACKUP_PATH:?}/$BACKUP" &&
+	cp -r "../$serverPath" "${BACKUP_PATH:?}/$BACKUP" &&
 	echo "Successfully created backup '$BACKUP'"
 
 fi
@@ -218,13 +227,13 @@ then
 	BACKUP="AUTOBACKUP_$(date +%y-%m-%d_%H:%M:%S)"
 	echo "A backup of the current world will be created just incase you want it back. It will be titled: $BACKUP"
 
-	if ! mv "../$serverPath/worlds" "${BACKUP_PATH:?}/$BACKUP"
+	if ! mv "../$serverPath" "${BACKUP_PATH:?}/$BACKUP"
 	then
 		echo "Backup failed, aborting restoration"
 		exit 1
 	fi
 
-	cp -r "${BACKUP_PATH:?}/$RESTORE" "../$serverPath/worlds" && echo "Restored '$RESTORE'"
+	cp -r "${BACKUP_PATH:?}/$RESTORE" "../$serverPath" && echo "Restored '$RESTORE'"
 fi
 
 $GETOPTIONS || exit 0

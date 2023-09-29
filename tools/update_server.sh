@@ -66,6 +66,25 @@ then
     else
         EDITION="JAVA"
         serverPath="java-server"
+
+        # val=0
+        # while [ "$val" != 1 ] && [ "$val" != 2 ]
+        # do
+
+        #     echo "What software would you like to use?"
+        #     printf "\t1. Vanilla\n"
+        #     printf "\t2. Paper\n"
+        #     read -r -p  "Enter number: " val
+        # done
+
+        #     case "$val" in
+        #     1)
+        #         SOFTWARE='VANILLA'
+        #         ;;
+        #     2)
+        #         SOFTWARE='PAPER'
+        #         ;;
+        #     esac
     fi
 
     if ! (cd "../$serverPath" > /dev/null)
@@ -111,11 +130,20 @@ then
 
 elif [ "${EDITION^^}" == "JAVA" ]
 then
-    url="https://www.minecraft.net/en-us/download/server"
-    # Because of course Java Edition wouldn't put its version number neatly in the download URL like Bedrock would. :(
-    web="$(curl -A "$agent" "$url" 2> /dev/null)"
-    download_link="$(echo "$web" | grep -o -m 1 "https://piston-data.mojang.com/v1/objects/.*/server.jar")"
-    version="$(echo "$web" | grep -o -m 1 "minecraft_server.*.jar" | awk '{ print substr($0, 18, length($0)-21) }' )"
+    # if [ "${SOFTWARE^^}" == "VANILLA" ]
+    # then
+        url="https://www.minecraft.net/en-us/download/server"
+        # Because of course Java Edition wouldn't put its version number neatly in the download URL like Bedrock would. :(
+        web="$(curl -A "$agent" "$url" 2> /dev/null)"
+        download_link="$(echo "$web" | grep -o -m 1 "https://piston-data.mojang.com/v1/objects/.*/server.jar")"
+        version="$(echo "$web" | grep -o -m 1 "minecraft_server.*.jar" | awk '{ print substr($0, 18, length($0)-21) }' )"
+    # elif [ "${SOFTWARE^^}" == "PAPER" ]
+    # then
+    #     url="https://papermc.io/downloads/paper"
+    #     download_link="$(curl -A "$agent" "$url" 2> /dev/null | grep -o "https://api.papermc.io/v2/projects/paper/versions/.*.jar")"
+    #     echo $download_link
+    #     exit 0
+    # fi
 else
     echo "Invalid version, check your server.config and try again"
     exit 1
@@ -169,11 +197,7 @@ then
     # Copy these files so they are not overwritten by the update
     echo "Making a copy of your server files so the new ones won't overwrite them..."
     mv "../$serverPath/allowlist.json" "../$serverPath/allowlist.json.old" && echo "• Copied allowlist.json"
-    mv "../$serverPath/behavior_packs/" "../$serverPath/behavior_packs.old/" && echo "• Copied behavior_packs/"
-    mv "../$serverPath/config/" "../$serverPath/config.old/" && echo "• Copied config/"
-    mv "../$serverPath/definitions/" "../$serverPath/definitions.old/" && echo "• Copied definitions/"
     mv "../$serverPath/permissions.json" "../$serverPath/permissions.json.old" && echo "• Copied permissions.json"
-    mv "../$serverPath/resource_packs/" "../$serverPath/resource_packs.old/" && echo "• Copied resource_packs/"
     mv "../$serverPath/server.properties" "../$serverPath/server.properties.old" && echo "• Copied server.properties"
 
     # Extract new files
@@ -182,14 +206,9 @@ then
     echo "Extraction complete!"
 
     # Restore the old files
-    ### TODO: Check how these mergre/replace (e.g. not put folders inside folders)
     echo "Finally, restoring copies..."
     mv -f "../$serverPath/allowlist.json.old" "../$serverPath/allowlist.json" && echo "• Restored allowlist.json"
-    mv -f "../$serverPath/behavior_packs.old/" "../$serverPath/behavior_packs/" && echo "• Restored behavior_packs/"
-    mv -f "../$serverPath/config.old/" "../$serverPath/config/" && echo "• Restored config/"
-    mv -f "../$serverPath/definitions.old/" "../$serverPath/definitions/" && echo "• Restored definitions/"
     mv -f "../$serverPath/permissions.json.old" "../$serverPath/permissions.json" && echo "• Restored permissions.json"
-    mv -f "../$serverPath/resource_packs.old/" "../$serverPath/resource_packs/" && echo "• Restored resource_packs/"
     mv -f "../$serverPath/server.properties.old" "../$serverPath/server.properties" && echo "• Restored server.properties"
 else
     # Clearly updating Java Edition is SIGNIFICANTLY easier...

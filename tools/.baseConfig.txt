@@ -36,6 +36,12 @@ AUTO_UPDATE=\"$AUTO_UPDATE\"
 # Minecraft Edition ***CHANGING THIS WILL CREATE A NEW WORLD*** Options are 'BEDROCK' or 'JAVA'
 EDITION=\"$EDITION\"
 
+# If using Minecraft Java, we can also downloadv different versions with plugin support, only takes effect if running a Java server. Option are 'VANILLA' or 'PAPER' (Default is 'VANILLA') ### More to come!
+SOFTWARE=\"$SOFTWARE\"
+
+# Restart server automatically if it crashes? Options are 'YES' or 'NO' (Default is 'NO')
+RESTART_ON_CRASH=\"$RESTART_ON_CRASH\"
+
 ### Other fun things!
 
 # Use Fortune to auto-generate a random phrase to announce on each server start-up (requires fortune-mod to be installed). Options are 'YES' or 'NO' (Default is 'NO')
