@@ -39,6 +39,9 @@ EDITION=\"$EDITION\"
 # If using Minecraft Java, we can also downloadv different versions with plugin support, only takes effect if running a Java server. Option are 'VANILLA' or 'PAPER' (Default is 'VANILLA') ### More to come!
 SOFTWARE=\"$SOFTWARE\"
 
+# How much memory should Minecraft be allowed to use? Follow number with size, e.g. K, M, G, etc. (Works only for Java Edition, default: 1024M)
+MAX_MEMORY=\"$MAX_MEMORY\"
+
 # Restart server automatically if it crashes? Options are 'YES' or 'NO' (Default is 'NO')
 RESTART_ON_CRASH=\"$RESTART_ON_CRASH\"
 

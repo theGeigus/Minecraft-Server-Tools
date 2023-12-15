@@ -130,7 +130,7 @@ then
 elif [ "${EDITION^^}" == "JAVA" ]
 then
 	echo 'Starting Minecraft: Java Edition' > ../tools/.server.log
-	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "java -Xmx1024M -Xms1024M -jar java_server.jar nogui"
+	screen -dmS "$SERVER_NAME" -L -Logfile "../tools/.server.log" bash -c "java -Xmx$MAX_MEMORY -jar java_server.jar nogui"
 else
 	echo "Invalid edition, check server.config and try again."
 	exit 1

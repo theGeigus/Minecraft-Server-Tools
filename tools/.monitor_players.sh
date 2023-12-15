@@ -72,7 +72,7 @@ do
     then
         if [ "${RESTART_ON_CRASH^^}" == "YES" ]
         then
-            ./stop_server.sh # Should have stopped already, but might as well check anyway
+            ./stop_server.sh -t 0 # Should have stopped already, but might as well check anyway
             ./start_server.sh
             exit 1
         fi
